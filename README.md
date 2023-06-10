@@ -1,8 +1,8 @@
 # abi-helper
 
-Set of tools to help decoding abis, transactions, blocks, receipts and logs for Ethereum based chains.
+**WARNING: Work In Progress!**
 
-**This code is under active development.**
+Set of tools to help decoding bytecode, transactions, blocks, receipts and logs for Ethereum based chains.
 
 
 ## Supported Chains

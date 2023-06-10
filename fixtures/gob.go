@@ -17,10 +17,11 @@ func writeGob(filePath string, object interface{}) error {
 
 func readGob(filePath string, object interface{}) error {
 	file, err := os.Open(filePath)
-	if err == nil {
-		decoder := gob.NewDecoder(file)
-		err = decoder.Decode(object)
+	if err != nil {
+		return err
 	}
-	file.Close()
-	return err
+	defer file.Close()
+
+	decoder := gob.NewDecoder(file)
+	return decoder.Decode(object)
 }

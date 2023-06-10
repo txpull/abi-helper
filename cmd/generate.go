@@ -53,7 +53,7 @@ var generateEthCmd = &cobra.Command{
 		)
 
 		config := fixtures.EthGeneratorConfig{
-			ClientUrl:               viper.GetString("eth.node.url"),
+			ClientURL:               viper.GetString("eth.node.url"),
 			ConcurrentClientsNumber: viper.GetUint16("eth.node.concurrent_clients_number"),
 			StartBlockNumber:        viper.GetUint64("eth.generator.start_block_number"),
 			EndBlockNumber:          viper.GetUint64("eth.generator.end_block_number"),

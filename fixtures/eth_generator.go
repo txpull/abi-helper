@@ -14,11 +14,11 @@ import (
 
 // EthGeneratorConfig holds the configuration for EthGenerator.
 type EthGeneratorConfig struct {
-	ClientUrl               string
-	ConcurrentClientsNumber uint16
-	StartBlockNumber        uint64
-	EndBlockNumber          uint64
-	FixtureDataPath         string
+	ClientURL               string // URL of the Ethereum client.
+	ConcurrentClientsNumber uint16 // Number of concurrent Ethereum clients.
+	StartBlockNumber        uint64 // Starting block number for generating fixtures.
+	EndBlockNumber          uint64 // Ending block number for generating fixtures.
+	FixtureDataPath         string // Path to the directory where fixtures will be stored.
 }
 
 // EthGenerator is responsible for generating Ethereum fixtures.
@@ -32,10 +32,10 @@ type EthGenerator struct {
 }
 
 // Generate generates the Ethereum fixtures.
-// XXX: in the future we may want to extend generate with start, end as well as
-// concurrent pull of the blocks from blockchain to speed up the download process.
+// It retrieves blocks from the blockchain within the specified range and encodes them into RLP format.
+// Transactions and receipts associated with the blocks are also encoded and stored.
 func (e *EthGenerator) Generate() error {
-	// First we should ensure to clean previously generated data
+	// Clean up previously generated data
 	e.blocks = [][]byte{}
 	e.transactions = make(map[common.Hash][]byte)
 	e.receipts = make(map[common.Hash][]byte)
@@ -64,9 +64,7 @@ func (e *EthGenerator) Generate() error {
 		}
 		e.blocks = append(e.blocks, blockBytes)
 
-		transactions := block.Transactions()
-
-		for _, tx := range transactions {
+		for _, tx := range block.Transactions() {
 			// Retrieve the transaction receipt
 			receipt, err := e.clients.GetClient().TransactionReceipt(e.ctx, tx.Hash())
 			if err != nil {
@@ -80,7 +78,7 @@ func (e *EthGenerator) Generate() error {
 			}
 
 			// Encode the transaction into RLP format
-			txBytes, err := rlp.EncodeToBytes(block)
+			txBytes, err := rlp.EncodeToBytes(tx)
 			if err != nil {
 				zap.L().Error(
 					"failed to RLP encode transaction",
@@ -92,8 +90,7 @@ func (e *EthGenerator) Generate() error {
 			}
 			e.transactions[tx.Hash()] = txBytes
 
-			// Encode the transaction receipt into RLP format
-			receiptBytes, err := rlp.EncodeToBytes(receipt)
+			receiptBytes, err := receipt.MarshalJSON()
 			if err != nil {
 				zap.L().Error(
 					"failed to RLP encode transaction receipt",
@@ -105,7 +102,6 @@ func (e *EthGenerator) Generate() error {
 			}
 			e.receipts[tx.Hash()] = receiptBytes
 		}
-
 		zap.L().Info("Successfully generated block", zap.Int64("number", block.Number().Int64()))
 	}
 	return nil
@@ -114,11 +110,8 @@ func (e *EthGenerator) Generate() error {
 // Write writes the generated fixtures to files.
 func (e *EthGenerator) Write() error {
 	blocksPath := filepath.Join(e.config.FixtureDataPath, "blocks.gob")
-
-	if _, err := os.Stat(blocksPath); err == nil {
-		if err := os.Remove(blocksPath); err != nil {
-			return err
-		}
+	if err := removeFileIfExists(blocksPath); err != nil {
+		return err
 	}
 
 	if err := writeGob(blocksPath, e.blocks); err != nil {
@@ -130,11 +123,8 @@ func (e *EthGenerator) Write() error {
 	}
 
 	txPath := filepath.Join(e.config.FixtureDataPath, "transactions.gob")
-
-	if _, err := os.Stat(txPath); err == nil {
-		if err := os.Remove(txPath); err != nil {
-			return err
-		}
+	if err := removeFileIfExists(txPath); err != nil {
+		return err
 	}
 
 	if err := writeGob(txPath, e.transactions); err != nil {
@@ -146,11 +136,8 @@ func (e *EthGenerator) Write() error {
 	}
 
 	receiptPath := filepath.Join(e.config.FixtureDataPath, "receipts.gob")
-
-	if _, err := os.Stat(receiptPath); err == nil {
-		if err := os.Remove(receiptPath); err != nil {
-			return err
-		}
+	if err := removeFileIfExists(receiptPath); err != nil {
+		return err
 	}
 
 	if err := writeGob(receiptPath, e.receipts); err != nil {
@@ -166,20 +153,30 @@ func (e *EthGenerator) Write() error {
 	return nil
 }
 
+// removeFileIfExists removes the file at the given path if it exists.
+func removeFileIfExists(path string) error {
+	if _, err := os.Stat(path); err == nil {
+		if err := os.Remove(path); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // NewEthGenerator creates a new instance of EthGenerator.
-func NewEthGenerator(ctx context.Context, config EthGeneratorConfig) (Generator, error) {
-	generator := EthGenerator{
+func NewEthGenerator(ctx context.Context, config EthGeneratorConfig) (*EthGenerator, error) {
+	generator := &EthGenerator{
 		ctx:          ctx,
 		config:       config,
 		transactions: make(map[common.Hash][]byte),
 		receipts:     make(map[common.Hash][]byte),
 	}
 
-	clients, err := clients.NewEthClients(config.ClientUrl, config.ConcurrentClientsNumber)
+	clients, err := clients.NewEthClients(config.ClientURL, config.ConcurrentClientsNumber)
 	if err != nil {
 		return nil, err
 	}
 	generator.clients = clients
 
-	return Generator(&generator), nil
+	return generator, nil
 }

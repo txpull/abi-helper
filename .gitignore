@@ -24,3 +24,4 @@ go.work
 # Workspace related files
 .abi-helper.yaml
 build/*
+*.go.prototype

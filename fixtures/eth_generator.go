@@ -4,6 +4,7 @@ import (
 	"context"
 	"github/txpull/abi-helper/clients"
 	"math/big"
+	"os"
 	"path/filepath"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -11,6 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// EthGeneratorConfig holds the configuration for EthGenerator.
 type EthGeneratorConfig struct {
 	ClientUrl               string
 	ConcurrentClientsNumber uint16
@@ -19,18 +21,26 @@ type EthGeneratorConfig struct {
 	FixtureDataPath         string
 }
 
+// EthGenerator is responsible for generating Ethereum fixtures.
 type EthGenerator struct {
-	ctx     context.Context
-	config  EthGeneratorConfig
-	clients *clients.EthClient
-
+	ctx          context.Context
+	config       EthGeneratorConfig
+	clients      *clients.EthClient
 	blocks       [][]byte
 	transactions map[common.Hash][]byte
 	receipts     map[common.Hash][]byte
 }
 
+// Generate generates the Ethereum fixtures.
 func (e *EthGenerator) Generate() error {
+
+	// Reset data...
+	e.blocks = [][]byte{}
+	e.transactions = make(map[common.Hash][]byte)
+	e.receipts = make(map[common.Hash][]byte)
+
 	for blockNumber := e.config.StartBlockNumber; blockNumber <= e.config.EndBlockNumber; blockNumber++ {
+		// Retrieve the block by number
 		block, err := e.clients.GetClient().BlockByNumber(e.ctx, big.NewInt(int64(blockNumber)))
 		if err != nil {
 			zap.L().Error(
@@ -41,10 +51,11 @@ func (e *EthGenerator) Generate() error {
 			return err
 		}
 
+		// Encode the block into RLP format
 		blockBytes, err := rlp.EncodeToBytes(block)
 		if err != nil {
 			zap.L().Error(
-				"failed to rlp encode block",
+				"failed to RLP encode block",
 				zap.Uint64("block_number", blockNumber),
 				zap.Error(err),
 			)
@@ -55,10 +66,11 @@ func (e *EthGenerator) Generate() error {
 		transactions := block.Transactions()
 
 		for _, tx := range transactions {
+			// Retrieve the transaction receipt
 			receipt, err := e.clients.GetClient().TransactionReceipt(e.ctx, tx.Hash())
 			if err != nil {
 				zap.L().Error(
-					"failed to retreive transaction receipt",
+					"failed to retrieve transaction receipt",
 					zap.Uint64("block_number", blockNumber),
 					zap.String("tx_hash", tx.Hash().Hex()),
 					zap.Error(err),
@@ -66,10 +78,11 @@ func (e *EthGenerator) Generate() error {
 				continue
 			}
 
+			// Encode the transaction into RLP format
 			txBytes, err := rlp.EncodeToBytes(block)
 			if err != nil {
 				zap.L().Error(
-					"failed to rlp encode transaction",
+					"failed to RLP encode transaction",
 					zap.Uint64("block_number", blockNumber),
 					zap.String("tx_hash", tx.Hash().Hex()),
 					zap.Error(err),
@@ -78,10 +91,11 @@ func (e *EthGenerator) Generate() error {
 			}
 			e.transactions[tx.Hash()] = txBytes
 
+			// Encode the transaction receipt into RLP format
 			receiptBytes, err := rlp.EncodeToBytes(receipt)
 			if err != nil {
 				zap.L().Error(
-					"failed to rlp encode transaction receipt",
+					"failed to RLP encode transaction receipt",
 					zap.Uint64("block_number", blockNumber),
 					zap.String("tx_hash", tx.Hash().Hex()),
 					zap.Error(err),
@@ -96,29 +110,51 @@ func (e *EthGenerator) Generate() error {
 	return nil
 }
 
+// Write writes the generated fixtures to files.
 func (e *EthGenerator) Write() error {
 	blocksPath := filepath.Join(e.config.FixtureDataPath, "blocks.gob")
+
+	if _, err := os.Stat(blocksPath); err == nil {
+		if err := os.Remove(blocksPath); err != nil {
+			return err
+		}
+	}
+
 	if err := writeGob(blocksPath, e.blocks); err != nil {
 		zap.L().Error(
-			"failed to write rlp encoded blocks",
+			"failed to write RLP encoded blocks",
 			zap.Error(err),
 		)
 		return err
 	}
 
 	txPath := filepath.Join(e.config.FixtureDataPath, "transactions.gob")
+
+	if _, err := os.Stat(txPath); err == nil {
+		if err := os.Remove(txPath); err != nil {
+			return err
+		}
+	}
+
 	if err := writeGob(txPath, e.transactions); err != nil {
 		zap.L().Error(
-			"failed to write rlp encoded block transactions",
+			"failed to write RLP encoded block transactions",
 			zap.Error(err),
 		)
 		return err
 	}
 
 	receiptPath := filepath.Join(e.config.FixtureDataPath, "receipts.gob")
+
+	if _, err := os.Stat(receiptPath); err == nil {
+		if err := os.Remove(receiptPath); err != nil {
+			return err
+		}
+	}
+
 	if err := writeGob(receiptPath, e.receipts); err != nil {
 		zap.L().Error(
-			"failed to write rlp encoded transaction receipts",
+			"failed to write RLP encoded transaction receipts",
 			zap.Error(err),
 		)
 		return err
@@ -129,12 +165,14 @@ func (e *EthGenerator) Write() error {
 	return nil
 }
 
+// Read reads the fixtures from files.
 func (e *EthGenerator) Read() error {
 	return nil
 }
 
+// NewEthGenerator creates a new instance of EthGenerator.
 func NewEthGenerator(ctx context.Context, config EthGeneratorConfig) (Generator, error) {
-	toReturn := EthGenerator{
+	generator := EthGenerator{
 		ctx:          ctx,
 		config:       config,
 		transactions: make(map[common.Hash][]byte),
@@ -145,7 +183,7 @@ func NewEthGenerator(ctx context.Context, config EthGeneratorConfig) (Generator,
 	if err != nil {
 		return nil, err
 	}
-	toReturn.clients = clients
+	generator.clients = clients
 
-	return Generator(&toReturn), nil
+	return Generator(&generator), nil
 }

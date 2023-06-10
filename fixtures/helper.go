@@ -7,7 +7,7 @@ import (
 
 func ReadBlockFixtures() ([]*types.Block, error) {
 	var toReturn []*types.Block
-	if err := ReadGob("../tests/fixtures/blocks.gob", &toReturn); err != nil {
+	if err := readGob("../tests/fixtures/blocks.gob", &toReturn); err != nil {
 		return nil, err
 	}
 	return toReturn, nil
@@ -15,7 +15,7 @@ func ReadBlockFixtures() ([]*types.Block, error) {
 
 func ReadTransactionFixtures() ([]*types.Transaction, error) {
 	var toReturn []*types.Transaction
-	if err := ReadGob("../tests/fixtures/transactions.gob", &toReturn); err != nil {
+	if err := readGob("../tests/fixtures/transactions.gob", &toReturn); err != nil {
 		return nil, err
 	}
 	return toReturn, nil
@@ -23,7 +23,7 @@ func ReadTransactionFixtures() ([]*types.Transaction, error) {
 
 func ReadReceiptFixtures() (map[common.Hash]*types.Receipt, error) {
 	var toReturn map[common.Hash]*types.Receipt
-	if err := ReadGob("../tests/fixtures/receipts.gob", &toReturn); err != nil {
+	if err := readGob("../tests/fixtures/receipts.gob", &toReturn); err != nil {
 		return nil, err
 	}
 	return toReturn, nil

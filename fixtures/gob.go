@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func WriteGob(filePath string, object interface{}) error {
+func writeGob(filePath string, object interface{}) error {
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err == nil {
 		encoder := gob.NewEncoder(file)
@@ -15,7 +15,7 @@ func WriteGob(filePath string, object interface{}) error {
 	return err
 }
 
-func ReadGob(filePath string, object interface{}) error {
+func readGob(filePath string, object interface{}) error {
 	file, err := os.Open(filePath)
 	if err == nil {
 		decoder := gob.NewDecoder(file)

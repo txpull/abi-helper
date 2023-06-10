@@ -1,5 +1,4 @@
-The MIT License (MIT)
-
+/*
 Copyright © 2023 TxPull <code@txpull.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,3 +18,42 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+*/
+package main
+
+import (
+	"fmt"
+	"github/txpull/abi-helper/cmd"
+	"github/txpull/abi-helper/logger"
+	"os"
+
+	"go.uber.org/zap"
+)
+
+var (
+	// Current software version flag obtained from go build -ldflags
+	Version string
+)
+
+func main() {
+	// NOTE: Production code should never-ever use Development logger as it's not as efficient.
+	// Commands themselves can use collored output for clearner visibility into the logs.
+	// Production will print json-based log structure to the stdout
+	logger, err := logger.GetDevelopmentLogger()
+	if err != nil {
+		panic(fmt.Errorf("failure to construct logger: %s", err))
+	}
+	defer logger.Sync()
+
+	// Basically what we want to achieve is ue zap.L() throughout project without
+	// passing by reference logger everywhere.
+	zap.ReplaceGlobals(logger)
+
+	// Sets the version variable for future consumption
+	cmd.SetVersion(Version)
+
+	if err := cmd.Execute(); err != nil {
+		logger.Error("failure to execute root command", zap.Error(err))
+		os.Exit(1)
+	}
+}

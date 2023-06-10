@@ -60,10 +60,12 @@ var generateEthCmd = &cobra.Command{
 			StartBlockNumber:        viper.GetUint64("eth.generator.start_block_number"),
 			EndBlockNumber:          viper.GetUint64("eth.generator.end_block_number"),
 			FixtureDataPath:         fixturesPath,
-			//StartBlockNumber:        28973170,
-
 		}
+
 		generator, err := fixtures.NewEthGenerator(cmd.Context(), config)
+		if err != nil {
+			return err
+		}
 
 		// Generate all of the data. Basically, fetch data from the blockchain itself.
 		if err := generator.Generate(); err != nil {
@@ -74,34 +76,26 @@ var generateEthCmd = &cobra.Command{
 			return err
 		}
 
-		return err
+		return nil
 	},
 }
 
 func init() {
 	fixturesCmd.AddCommand(generateEthCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
 	generateEthCmd.PersistentFlags().StringP("eth.node.url", "u", "", "Ethereum based node full url (example: https://node-url:port)")
 	generateEthCmd.MarkFlagRequired("eth.node.url")
-	viper.BindPFlag("eth.node.url", rootCmd.PersistentFlags().Lookup("eth.node.url"))
+	viper.BindPFlag("eth.node.url", generateEthCmd.PersistentFlags().Lookup("eth.node.url"))
 
 	generateEthCmd.PersistentFlags().Uint16P("eth.node.concurrent_clients_number", "c", 1, "How many concurrent node clients to spawn")
 	generateEthCmd.MarkFlagRequired("eth.node.concurrent_clients_number")
-	viper.BindPFlag("eth.node.concurrent_clients_number", rootCmd.PersistentFlags().Lookup("eth.node.concurrent_clients_number"))
+	viper.BindPFlag("eth.node.concurrent_clients_number", generateEthCmd.PersistentFlags().Lookup("eth.node.concurrent_clients_number"))
 
 	generateEthCmd.PersistentFlags().Uint64P("eth.generator.start_block_number", "s", 0, "How many concurrent node clients to spawn")
 	generateEthCmd.MarkFlagRequired("eth.generator.start_block_numberr")
-	viper.BindPFlag("eth.generator.start_block_number", rootCmd.PersistentFlags().Lookup("eth.generator.start_block_number"))
+	viper.BindPFlag("eth.generator.start_block_number", generateEthCmd.PersistentFlags().Lookup("eth.generator.start_block_number"))
 
 	generateEthCmd.PersistentFlags().Uint64P("eth.generator.end_block_number", "e", 0, "How many concurrent node clients to spawn")
 	generateEthCmd.MarkFlagRequired("eth.generator.end_block_numberr")
-	viper.BindPFlag("eth.generator.end_block_number", rootCmd.PersistentFlags().Lookup("eth.generator.end_block_number"))
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	viper.BindPFlag("eth.generator.end_block_number", generateEthCmd.PersistentFlags().Lookup("eth.generator.end_block_number"))
 }

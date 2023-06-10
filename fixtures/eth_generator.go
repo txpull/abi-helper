@@ -165,11 +165,6 @@ func (e *EthGenerator) Write() error {
 	return nil
 }
 
-// Read reads the fixtures from files.
-func (e *EthGenerator) Read() error {
-	return nil
-}
-
 // NewEthGenerator creates a new instance of EthGenerator.
 func NewEthGenerator(ctx context.Context, config EthGeneratorConfig) (Generator, error) {
 	generator := EthGenerator{

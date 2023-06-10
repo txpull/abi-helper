@@ -22,7 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"github/txpull/abi-helper/fixtures"
 	"os"
 	"path/filepath"
@@ -35,14 +34,13 @@ import (
 // generateCmd represents the generate command
 var generateEthCmd = &cobra.Command{
 	Use:   "generate-eth",
-	Short: "Generate ethereum based fixtures .gob files",
+	Short: "Generate ethereum based fixtures and write them into (block|transactions|receipt).gob files",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fixturesPath := viper.GetString("eth.generator.fixtures_path")
 
 		if fixturesPath == "" {
 			currentDir, err := os.Getwd()
 			if err != nil {
-				fmt.Println("Failed to get current directory:", err)
 				return err
 			}
 			fixturesPath = filepath.Join(currentDir, "data", "fixtures")
@@ -67,11 +65,12 @@ var generateEthCmd = &cobra.Command{
 			return err
 		}
 
-		// Generate all of the data. Basically, fetch data from the blockchain itself.
+		// Generate all of the data. Basically, fetch data from the blockchain itself
 		if err := generator.Generate(); err != nil {
 			return err
 		}
 
+		// Will remove existing files in fixture data path and replace files with new content
 		if err := generator.Write(); err != nil {
 			return err
 		}

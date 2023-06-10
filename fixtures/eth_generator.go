@@ -32,9 +32,10 @@ type EthGenerator struct {
 }
 
 // Generate generates the Ethereum fixtures.
+// XXX: in the future we may want to extend generate with start, end as well as
+// concurrent pull of the blocks from blockchain to speed up the download process.
 func (e *EthGenerator) Generate() error {
-
-	// Reset data...
+	// First we should ensure to clean previously generated data
 	e.blocks = [][]byte{}
 	e.transactions = make(map[common.Hash][]byte)
 	e.receipts = make(map[common.Hash][]byte)

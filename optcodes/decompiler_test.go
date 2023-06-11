@@ -1,11 +1,9 @@
-package optcodes_test
+package optcodes
 
 import (
 	"context"
-	"fmt"
 	"github/txpull/abi-helper/clients"
 	"github/txpull/abi-helper/fixtures"
-	"github/txpull/abi-helper/optcodes"
 	"os"
 	"testing"
 
@@ -13,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOptcode_DiscoverAndDecompiler(t *testing.T) {
+func TestOptcode_DiscoverAndDecompile(t *testing.T) {
 	tAssert := assert.New(t)
 
 	ethReader := fixtures.GetEthReaderForTest(tAssert)
@@ -38,14 +36,14 @@ func TestOptcode_DiscoverAndDecompiler(t *testing.T) {
 
 			t.Logf("Discovered contract address: %v", receipt.ContractAddress)
 
-			decompiler, err := optcodes.NewDecompiler(
+			decompiler, err := NewDecompiler(
 				context.TODO(),
 				clients,
 				receipt.ContractAddress,
 			)
 			tAssert.NoError(err)
 			tAssert.NotNil(decompiler)
-			tAssert.IsType(&optcodes.Decompiler{}, decompiler)
+			tAssert.IsType(&Decompiler{}, decompiler)
 
 			bytecode, err := decompiler.DiscoverContractBytecode()
 			tAssert.NoError(err)
@@ -55,13 +53,52 @@ func TestOptcode_DiscoverAndDecompiler(t *testing.T) {
 			tAssert.NoError(err)
 
 			tAssert.GreaterOrEqual(len(decompiler.GetInstructions()), 1)
-
-			for _, instr := range decompiler.GetInstructionsByOpCode(optcodes.CALL) {
-				// Print the execution flow tree for the CALL opcode
-				decompiler.PrintInstructionTree(instr)
-				fmt.Println("---------------------------------")
-			}
-
 		}
 	}
+}
+
+func TestDecompiler_Decompile(t *testing.T) {
+	// Create a new Decompiler instance and set the bytecode.
+	decompiler := &Decompiler{
+		bytecode: []byte{
+			byte(PUSH1), byte(0x01), // PUSH1 0x01
+			byte(PUSH1), byte(0x02), // PUSH1 0x02
+			byte(ADD), // ADD
+		},
+	}
+
+	err := decompiler.Decompile()
+	assert.NoError(t, err)
+
+	instructions := decompiler.GetInstructions()
+	assert.Len(t, instructions, 3)
+
+	assert.Equal(t, OpCode(PUSH1), instructions[0].OpCode)
+	assert.Equal(t, OpCode(PUSH1), instructions[1].OpCode)
+	assert.Equal(t, OpCode(ADD), instructions[2].OpCode)
+}
+
+func TestDecompiler_MatchFunctionSignature(t *testing.T) {
+	// Create a new Decompiler instance and set the instructions.
+	decompiler := &Decompiler{
+		instructions: []Instruction{
+			{
+				OpCode: CALL,
+				Args:   []byte{0x01, 0x02, 0x03, 0x04},
+			},
+			{
+				OpCode: CALL,
+				Args:   []byte{0x05, 0x06, 0x07, 0x08},
+			},
+		},
+	}
+
+	signature := "0x01020304"
+	assert.True(t, decompiler.MatchFunctionSignature(signature))
+
+	signature = "0x05060708"
+	assert.True(t, decompiler.MatchFunctionSignature(signature))
+
+	signature = "0x01020305" // Signature not present
+	assert.False(t, decompiler.MatchFunctionSignature(signature))
 }

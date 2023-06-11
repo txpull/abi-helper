@@ -563,3 +563,12 @@ var stringToOp = map[string]OpCode{
 func StringToOp(str string) OpCode {
 	return stringToOp[str]
 }
+
+func (op OpCode) IsJump() bool {
+	switch op {
+	case JUMP, JUMPI, JUMPDEST:
+		return true
+	default:
+		return false
+	}
+}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github/txpull/abi-helper/bytecodes"
 	"github/txpull/abi-helper/clients"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -75,6 +76,9 @@ func (d *Decompiler) Decompile() error {
 
 // MatchFunctionSignature checks if a given function signature matches any of the decompiled instructions.
 func (d *Decompiler) MatchFunctionSignature(signature string) bool {
+	// Remove "0x" prefix if present
+	signature = strings.TrimPrefix(signature, "0x")
+  
 	for _, instruction := range d.instructions {
 		if instruction.OpCode == CALL && len(instruction.Args) >= 4 {
 			functionSig := common.Bytes2Hex(instruction.Args[:4])

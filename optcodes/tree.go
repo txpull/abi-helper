@@ -13,19 +13,32 @@ type TreeNode struct {
 
 // GetTree returns the tree representation of the execution flow.
 func (d *Decompiler) GetTree() *TreeNode {
+	if len(d.instructions) == 0 {
+		return nil
+	}
+
 	root := &TreeNode{}
-	d.buildExecutionTree(root, 0)
-	return root
+	stack := []*TreeNode{root}
+
+	d.buildExecutionTree(stack)
+
+	return root.Children[0]
 }
 
 // buildExecutionTree recursively builds the execution flow tree starting from the given node.
-func (d *Decompiler) buildExecutionTree(node *TreeNode, offset int) {
-	for i := offset; i < len(d.instructions); i++ {
-		instruction := d.instructions[i]
-		childNode := &TreeNode{Instruction: instruction}
-		node.Children = append(node.Children, childNode)
-		if d.IsControlFlowInstruction(instruction.OpCode) {
-			d.buildExecutionTree(childNode, instruction.Offset+1)
+func (d *Decompiler) buildExecutionTree(stack []*TreeNode) {
+	for _, instruction := range d.instructions {
+		node := &TreeNode{Instruction: instruction}
+
+		if len(stack) > 0 {
+			parent := stack[len(stack)-1]
+			parent.Children = append(parent.Children, node)
+		}
+
+		stack = append(stack, node)
+
+		if instruction.OpCode.IsJump() {
+			stack = stack[:len(stack)-1]
 		}
 	}
 }

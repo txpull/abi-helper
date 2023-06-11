@@ -1,10 +1,7 @@
 package fixtures_test
 
 import (
-	"context"
 	"github/txpull/abi-helper/fixtures"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,36 +10,18 @@ import (
 func TestEthReader_Discover(t *testing.T) {
 	tAssert := assert.New(t)
 
-	currentDir, err := os.Getwd()
-	tAssert.NoError(err)
+	ethReader := fixtures.GetEthReaderForTest(tAssert)
 
-	fixturesPath := filepath.Join(
-		currentDir,
-		"..", "data", "fixtures",
-	)
-
-	ethReader, err := fixtures.NewEthReader(context.TODO(), fixturesPath)
-	tAssert.NoError(err, "failed to create EthReader")
-
-	err = ethReader.Discover()
+	err := ethReader.Discover()
 	tAssert.NoError(err, "discover returned an error")
 }
 
 func TestEthReader_GetBlocks(t *testing.T) {
 	tAssert := assert.New(t)
 
-	currentDir, err := os.Getwd()
-	tAssert.NoError(err)
+	ethReader := fixtures.GetEthReaderForTest(tAssert)
 
-	fixturesPath := filepath.Join(
-		currentDir,
-		"..", "data", "fixtures",
-	)
-
-	ethReader, err := fixtures.NewEthReader(context.TODO(), fixturesPath)
-	tAssert.NoError(err, "failed to create EthReader")
-
-	err = ethReader.Discover()
+	err := ethReader.Discover()
 	tAssert.NoError(err, "discover returned an error")
 
 	blocks := ethReader.GetBlocks()
@@ -52,18 +31,9 @@ func TestEthReader_GetBlocks(t *testing.T) {
 func TestEthReader_GetTransactions(t *testing.T) {
 	tAssert := assert.New(t)
 
-	currentDir, err := os.Getwd()
-	tAssert.NoError(err)
+	ethReader := fixtures.GetEthReaderForTest(tAssert)
 
-	fixturesPath := filepath.Join(
-		currentDir,
-		"..", "data", "fixtures",
-	)
-
-	ethReader, err := fixtures.NewEthReader(context.TODO(), fixturesPath)
-	tAssert.NoError(err, "failed to create EthReader")
-
-	err = ethReader.Discover()
+	err := ethReader.Discover()
 	tAssert.NoError(err, "discover returned an error")
 
 	blocks := ethReader.GetBlocks()
@@ -73,18 +43,9 @@ func TestEthReader_GetTransactions(t *testing.T) {
 func TestEthReader_GetReceipts(t *testing.T) {
 	tAssert := assert.New(t)
 
-	currentDir, err := os.Getwd()
-	tAssert.NoError(err)
+	ethReader := fixtures.GetEthReaderForTest(tAssert)
 
-	fixturesPath := filepath.Join(
-		currentDir,
-		"..", "data", "fixtures",
-	)
-
-	ethReader, err := fixtures.NewEthReader(context.TODO(), fixturesPath)
-	tAssert.NoError(err, "failed to create EthReader")
-
-	err = ethReader.Discover()
+	err := ethReader.Discover()
 	tAssert.NoError(err, "discover returned an error")
 
 	txns := ethReader.GetTransactions()
@@ -95,18 +56,9 @@ func TestEthReader_GetReceipts(t *testing.T) {
 func TestEthReader_GetReceiptFromTxHash(t *testing.T) {
 	tAssert := assert.New(t)
 
-	currentDir, err := os.Getwd()
-	tAssert.NoError(err)
+	ethReader := fixtures.GetEthReaderForTest(tAssert)
 
-	fixturesPath := filepath.Join(
-		currentDir,
-		"..", "data", "fixtures",
-	)
-
-	ethReader, err := fixtures.NewEthReader(context.TODO(), fixturesPath)
-	tAssert.NoError(err, "failed to create EthReader")
-
-	err = ethReader.Discover()
+	err := ethReader.Discover()
 	tAssert.NoError(err, "discover returned an error")
 
 	for _, txn := range ethReader.GetTransactions() {

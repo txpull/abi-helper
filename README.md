@@ -14,3 +14,22 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 ## TODO
 
 - [] Bytecode ABI decompiler (Solidity)
+
+
+## TESTING
+
+### Public Node URLS
+
+In order to run tests successfully you will need to have node (not archive node) access urls to the
+ethereum and/or bsc network. If you don't have your own node, you can find free nodes at:
+- Binance Smart Chain: https://chainlist.org/chain/56
+- Ethereum: https://chainlist.org/chain/1
+
+
+### Running Tests
+
+In order to run tests, get coverage of the tested code, you can simply run:
+
+```sh
+make test
+```

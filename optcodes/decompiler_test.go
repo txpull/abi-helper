@@ -2,10 +2,11 @@ package optcodes
 
 import (
 	"context"
-	"github/txpull/abi-helper/clients"
-	"github/txpull/abi-helper/fixtures"
 	"os"
 	"testing"
+
+	"github.com/txpull/abi-helper/clients"
+	"github.com/txpull/abi-helper/fixtures"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"

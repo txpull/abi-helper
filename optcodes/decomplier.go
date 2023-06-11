@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github/txpull/abi-helper/bytecodes"
-	"github/txpull/abi-helper/clients"
+
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/txpull/abi-helper/bytecodes"
+	"github.com/txpull/abi-helper/clients"
 )
 
 // Decompiler decompiles bytecode into optcode instructions.

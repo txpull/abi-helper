@@ -23,9 +23,10 @@ package main
 
 import (
 	"fmt"
-	"github/txpull/abi-helper/cmd"
-	"github/txpull/abi-helper/logger"
 	"os"
+
+	"github.com/txpull/abi-helper/cmd"
+	"github.com/txpull/abi-helper/logger"
 
 	"go.uber.org/zap"
 )

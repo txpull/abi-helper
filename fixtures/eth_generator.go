@@ -2,10 +2,11 @@ package fixtures
 
 import (
 	"context"
-	"github/txpull/abi-helper/clients"
 	"math/big"
 	"os"
 	"path/filepath"
+
+	"github.com/txpull/abi-helper/clients"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"

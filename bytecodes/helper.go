@@ -2,8 +2,9 @@ package bytecodes
 
 import (
 	"context"
-	"github/txpull/abi-helper/clients"
 	"math/big"
+
+	"github.com/txpull/abi-helper/clients"
 
 	"github.com/ethereum/go-ethereum/common"
 )

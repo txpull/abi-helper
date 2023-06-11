@@ -22,9 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github/txpull/abi-helper/fixtures"
 	"os"
 	"path/filepath"
+
+	"github.com/txpull/abi-helper/fixtures"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

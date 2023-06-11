@@ -1,8 +1,9 @@
 package fixtures_test
 
 import (
-	"github/txpull/abi-helper/fixtures"
 	"testing"
+
+	"github.com/txpull/abi-helper/fixtures"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -1,4 +1,4 @@
-module github/txpull/abi-helper
+module github.com/txpull/abi-helper
 
 go 1.19
 

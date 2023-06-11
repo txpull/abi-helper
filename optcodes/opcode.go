@@ -572,3 +572,4 @@ func (op OpCode) IsJump() bool {
 		return false
 	}
 }
+

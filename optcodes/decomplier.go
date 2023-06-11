@@ -78,7 +78,7 @@ func (d *Decompiler) Decompile() error {
 func (d *Decompiler) MatchFunctionSignature(signature string) bool {
 	// Remove "0x" prefix if present
 	signature = strings.TrimPrefix(signature, "0x")
-
+  
 	for _, instruction := range d.instructions {
 		if instruction.OpCode == CALL && len(instruction.Args) >= 4 {
 			functionSig := common.Bytes2Hex(instruction.Args[:4])

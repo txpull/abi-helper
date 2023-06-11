@@ -38,3 +38,15 @@ In order to run tests, get coverage of the tested code, you can simply run:
 ```sh
 make test
 ```
+
+### Benchmarks
+
+```
+goos: linux
+goarch: amd64
+pkg: github/txpull/abi-helper/optcodes
+cpu: AMD Ryzen Threadripper 3960X 24-Core Processor 
+BenchmarkDecompiler_Performance
+BenchmarkDecompiler_Performance-48    	       7	 184002805 ns/op	288450341 B/op	       8 allocs/op
+PASS
+```

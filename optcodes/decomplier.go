@@ -78,7 +78,7 @@ func (d *Decompiler) Decompile() error {
 func (d *Decompiler) MatchFunctionSignature(signature string) bool {
 	// Remove "0x" prefix if present
 	signature = strings.TrimPrefix(signature, "0x")
-  
+
 	for _, instruction := range d.instructions {
 		if instruction.OpCode == CALL && len(instruction.Args) >= 4 {
 			functionSig := common.Bytes2Hex(instruction.Args[:4])
@@ -162,6 +162,15 @@ func (d *Decompiler) IsSelfDestruct() bool {
 // isControlFlowInstruction checks if the given opcode represents a control flow instruction.
 func (d *Decompiler) IsControlFlowInstruction(op OpCode) bool {
 	return op == JUMP || op == JUMPI || op == JUMPDEST || op == RETURN || op == REVERT || op == SELFDESTRUCT
+}
+
+func (d *Decompiler) MatchInstruction(instruction Instruction) bool {
+	for _, inst := range d.instructions {
+		if inst.Offset == instruction.Offset && inst.OpCode == instruction.OpCode && bytes.Equal(inst.Args, instruction.Args) {
+			return true
+		}
+	}
+	return false
 }
 
 // NewDecompiler creates a new Decompiler instance.

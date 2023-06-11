@@ -10,6 +10,10 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 - BSC (Binance Smart Chain)
 - Ethereum
 
+## Features
+
+- [x] Automatic fixtures (sample data) download direcly from (bsc|eth) mainnet used for tests.
+- [x] Optcode discovery from any contract bytecode that is deployed on the (bsc|eth) mainnets.
 
 ## TODO
 
@@ -22,6 +26,7 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 
 In order to run tests successfully you will need to have node (not archive node) access urls to the
 ethereum and/or bsc network. If you don't have your own node, you can find free nodes at:
+
 - Binance Smart Chain: https://chainlist.org/chain/56
 - Ethereum: https://chainlist.org/chain/1
 

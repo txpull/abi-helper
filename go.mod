@@ -7,7 +7,6 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.3
-	github.com/test-go/testify v1.1.4
 	go.uber.org/zap v1.24.0
 )
 

@@ -17,7 +17,11 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 
 ## TODO
 
-- [] Bytecode ABI decompiler (Solidity)
+- [] Extract compiler information from transaction contract creation data if available.
+- [] Extract contract deployment constructor information.
+- [] Extract contract swarm ipfs information.
+- [] Extract contract abi from (3rd-party, metadata, reverse engineering bytecode)
+- [] 
 
 
 ## Testing

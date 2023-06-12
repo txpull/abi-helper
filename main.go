@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/txpull/abi-helper/cmd"
-	"github.com/txpull/abi-helper/logger"
+	"github.com/txpull/bytecode/cmd"
+	"github.com/txpull/bytecode/logger"
 
 	"go.uber.org/zap"
 )

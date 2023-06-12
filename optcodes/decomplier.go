@@ -3,20 +3,21 @@ package optcodes
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/abi-helper/bytecodes"
-	"github.com/txpull/abi-helper/clients"
+)
+
+var (
+	ErrEmptyBytecode = errors.New("bytecode is not set or empty bytecode provided")
 )
 
 // Decompiler decompiles bytecode into optcode instructions.
 type Decompiler struct {
 	ctx          context.Context
-	client       *clients.EthClient
-	contractAddr common.Address
 	bytecode     []byte
 	bytecodeSize uint64
 	instructions []Instruction
@@ -29,12 +30,13 @@ type Instruction struct {
 	Args   []byte
 }
 
-// DiscoverContractBytecode fetches contract bytecode from latest blockchain state
-func (d *Decompiler) DiscoverContractBytecode() ([]byte, error) {
-	if len(d.bytecode) > 0 {
-		return d.bytecode, nil
-	}
-	return bytecodes.GetBytecode(d.ctx, d.client, d.contractAddr, nil)
+func (d *Decompiler) SetBytecode(b []byte) {
+	d.bytecode = b
+	d.bytecodeSize = uint64(len(b))
+}
+
+func (d *Decompiler) GetBytecode() []byte {
+	return d.bytecode
 }
 
 func (d *Decompiler) GetBytecodeSize() uint64 {
@@ -42,13 +44,9 @@ func (d *Decompiler) GetBytecodeSize() uint64 {
 }
 
 func (d *Decompiler) Decompile() error {
-	bytecode, err := d.DiscoverContractBytecode()
-	if err != nil {
-		return err
+	if d.bytecodeSize < 1 {
+		return ErrEmptyBytecode
 	}
-
-	d.bytecode = bytecode
-	d.bytecodeSize = uint64(len(bytecode))
 
 	offset := 0
 	for offset < len(d.bytecode) {
@@ -107,21 +105,8 @@ func (d *Decompiler) GetInstructions() []Instruction {
 	return d.instructions
 }
 
-// String returns the string representation of the decompiled optcode instructions.
+// String returns a string representation of the decompiled bytecode as a sequence of bytes.
 func (d *Decompiler) String() string {
-	var result string
-	for _, instruction := range d.instructions {
-		result += fmt.Sprintf("0x%04x %s", instruction.Offset, instruction.OpCode.String())
-		if len(instruction.Args) > 0 {
-			result += fmt.Sprintf(" 0x%s", common.Bytes2Hex(instruction.Args))
-		}
-		result += "\n"
-	}
-	return result
-}
-
-// StringBytes returns a string representation of the decompiled bytecode as a sequence of bytes.
-func (d *Decompiler) StringBytes() string {
 	var buf bytes.Buffer
 
 	for _, instr := range d.instructions {
@@ -176,11 +161,11 @@ func (d *Decompiler) MatchInstruction(instruction Instruction) bool {
 
 // NewDecompiler creates a new Decompiler instance.
 // @TODO: Add automatic decompile in the future from NewDecompiler()
-func NewDecompiler(ctx context.Context, client *clients.EthClient, contractAddr common.Address) (*Decompiler, error) {
+func NewDecompiler(ctx context.Context, b []byte) (*Decompiler, error) {
 	return &Decompiler{
 		ctx:          ctx,
-		client:       client,
-		contractAddr: contractAddr,
+		bytecode:     b,
+		bytecodeSize: uint64(len(b)),
 		instructions: []Instruction{},
 	}, nil
 }

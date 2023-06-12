@@ -5,8 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/txpull/abi-helper/clients"
-	"github.com/txpull/abi-helper/fixtures"
+	"github.com/txpull/bytecode/clients"
+	"github.com/txpull/bytecode/fixtures"
+	"github.com/txpull/bytecode/helpers"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
@@ -37,18 +38,17 @@ func TestOptcode_DiscoverAndDecompile(t *testing.T) {
 
 			t.Logf("Discovered contract address: %v", receipt.ContractAddress)
 
-			decompiler, err := NewDecompiler(
-				context.TODO(),
-				clients,
-				receipt.ContractAddress,
-			)
+			bytes, err := helpers.GetBytecode(context.TODO(), clients, receipt.ContractAddress, nil)
+			tAssert.NoError(err)
+			tAssert.GreaterOrEqual(len(bytes), 1)
+
+			decompiler, err := NewDecompiler(context.TODO(), bytes)
 			tAssert.NoError(err)
 			tAssert.NotNil(decompiler)
 			tAssert.IsType(&Decompiler{}, decompiler)
 
-			bytecode, err := decompiler.DiscoverContractBytecode()
-			tAssert.NoError(err)
-			tAssert.IsType([]byte{}, bytecode)
+			bSize := decompiler.GetBytecodeSize()
+			tAssert.Equal(uint64(len(bytes)), bSize)
 
 			err = decompiler.Decompile()
 			tAssert.NoError(err)
@@ -60,12 +60,15 @@ func TestOptcode_DiscoverAndDecompile(t *testing.T) {
 
 func TestDecompiler_Decompile(t *testing.T) {
 	// Create a new Decompiler instance and set the bytecode.
+	bytecode := []byte{
+		byte(PUSH1), byte(0x01), // PUSH1 0x01
+		byte(PUSH1), byte(0x02), // PUSH1 0x02
+		byte(ADD), // ADD
+	}
+
 	decompiler := &Decompiler{
-		bytecode: []byte{
-			byte(PUSH1), byte(0x01), // PUSH1 0x01
-			byte(PUSH1), byte(0x02), // PUSH1 0x02
-			byte(ADD), // ADD
-		},
+		bytecode:     bytecode,
+		bytecodeSize: uint64(len(bytecode)),
 	}
 
 	err := decompiler.Decompile()

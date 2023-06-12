@@ -62,16 +62,11 @@ func extractValue(argType string, startIndex int64, dataBytes []byte) interface{
 		return argValue
 
 	case "uint256":
-		// Convert the hex string to a big-endian byte slice
-		argValueBytes, _ := hex.DecodeString(argValueHex)
-
-		// Reverse the byte slice to get little-endian representation
-		reverseBytes(argValueBytes)
+		// Convert the hex string to a little-endian byte slice
+		argValueBytes := common.Hex2Bytes(argValueHex)
 
 		// Create a new big.Int and set its value from the byte slice
-		argValue := new(big.Int).SetBytes(argValueBytes)
-
-		return argValue
+		return new(big.Int).SetBytes(argValueBytes)
 
 	case "uint256[]":
 		// Extract the length of the uint256[] array
@@ -118,8 +113,7 @@ func extractValue(argType string, startIndex int64, dataBytes []byte) interface{
 
 	case "bytes":
 		// Convert the hex string to a byte slice
-		argValueBytes, _ := hex.DecodeString(argValueHex)
-		return argValueBytes
+		return common.Hex2Bytes(argValueHex)
 
 	case "bytes[]":
 		// Extract the length of the bytes[] array
@@ -153,12 +147,5 @@ func extractValue(argType string, startIndex int64, dataBytes []byte) interface{
 		return bytesArray
 	default:
 		return nil
-	}
-}
-
-// Function to reverse a byte slice
-func reverseBytes(data []byte) {
-	for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
-		data[i], data[j] = data[j], data[i]
 	}
 }

@@ -1,4 +1,4 @@
-# abi-helper
+# bytecode
 
 **WARNING: Work In Progress!**
 
@@ -14,6 +14,9 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 
 - [x] Automatic fixtures (sample data) download direcly from (bsc|eth) mainnet used for tests.
 - [x] Optcode discovery from any contract bytecode that is deployed on the (bsc|eth) mainnets.
+- [x] Reading signature database.
+- [x] Ability to get optcode for any transaction that contains appropriate data.
+- [x] Ability to potentially get transaction method id and arguments from contracts without abi.
 
 ## TODO
 
@@ -21,8 +24,14 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 - [] Extract contract deployment constructor information.
 - [] Extract contract swarm ipfs information.
 - [] Extract contract abi from (3rd-party, metadata, reverse engineering bytecode)
+- [] Extend signatures to download new signatures from 4byte.dictionary and other services including parsing abis and writing signatures from abis.
 - [] 
 
+## BUGS
+
+Just a list for me to fix it while developing without opening tickets
+
+- [] Argument decoding works to a point, should be fixed
 
 ## Testing
 
@@ -48,7 +57,7 @@ make test
 ```
 goos: linux
 goarch: amd64
-pkg: github/txpull/abi-helper/optcodes
+pkg: github/txpull/bytecode/optcodes
 cpu: AMD Ryzen Threadripper 3960X 24-Core Processor 
 BenchmarkDecompiler_Performance
 BenchmarkDecompiler_Performance-48    	       7	 184002805 ns/op	288450341 B/op	       8 allocs/op

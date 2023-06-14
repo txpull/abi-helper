@@ -1,4 +1,4 @@
-package optcodes
+package opcodes
 
 import (
 	"bytes"

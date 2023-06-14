@@ -6,7 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/txpull/bytecode/optcodes"
+	"github.com/txpull/bytecode/opcodes"
 	"github.com/txpull/bytecode/signatures"
 	"go.uber.org/zap"
 )
@@ -22,7 +22,7 @@ type MethodArgument struct {
 type Decompiler struct {
 	ctx        context.Context
 	tx         *types.Transaction
-	decompiler *optcodes.Decompiler
+	decompiler *opcodes.Decompiler
 	signatures *signatures.Signatures
 	signature  *signatures.Signature
 }
@@ -31,7 +31,7 @@ type Decompiler struct {
 // It takes a context and a types.Transaction object as input parameters.
 // It returns a pointer to the created Decompiler object and an error.
 func NewDecompiler(ctx context.Context, tx *types.Transaction, s *signatures.Signatures) (*Decompiler, error) {
-	opcode, err := optcodes.NewDecompiler(ctx, tx.Data())
+	opcode, err := opcodes.NewDecompiler(ctx, tx.Data())
 	if err != nil {
 		return nil, err
 	}
@@ -181,11 +181,11 @@ func (d *Decompiler) Decompile() error {
 }
 
 // GetInstructions returns the decompiled EVM opcode instructions.
-func (d *Decompiler) GetInstructions() []optcodes.Instruction {
+func (d *Decompiler) GetInstructions() []opcodes.Instruction {
 	return d.decompiler.GetInstructions()
 }
 
 // GetOptDecompiler returns the underlying optcodes.Decompiler instance.
-func (d *Decompiler) GetOptDecompiler() *optcodes.Decompiler {
+func (d *Decompiler) GetOptDecompiler() *opcodes.Decompiler {
 	return d.decompiler
 }

@@ -7,8 +7,9 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 
 ## Supported Chains
 
-- BSC (Binance Smart Chain)
-- Ethereum
+- [x] BSC (Binance Smart Chain)
+- [] Ethereum
+- [] Polygon
 
 ## Features
 
@@ -17,6 +18,7 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 - [x] Reading signature database.
 - [x] Ability to get optcode for any transaction that contains appropriate data.
 - [x] Ability to potentially get transaction method id and arguments from contracts without abi.
+- [x] 3rd party contract code scanners (BscScan)
 
 ## TODO
 

@@ -22,10 +22,10 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 
 - [] Extract compiler information from transaction contract creation data if available.
 - [] Extract contract deployment constructor information.
-- [] Extract contract swarm ipfs information.
+- [] Extract contract swarm ipfs/bzz information.
 - [] Extract contract abi from (3rd-party, metadata, reverse engineering bytecode)
 - [] Extend signatures to download new signatures from 4byte.dictionary and other services including parsing abis and writing signatures from abis.
-- [] 
+
 
 ## BUGS
 

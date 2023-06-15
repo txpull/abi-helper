@@ -1,6 +1,7 @@
 # bytecode
 
 **WARNING: Work In Progress!**
+**WARNING: Name of the repo will change in the future!**
 
 Set of tools to help decoding bytecode, transactions, blocks, receipts and logs for Ethereum based chains.
 

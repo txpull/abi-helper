@@ -22,14 +22,64 @@ THE SOFTWARE.
 package syncers_cmd
 
 import (
+	"os"
+	"path"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	bscscan_crawler "github.com/txpull/bytecode/crawlers/bscscan"
+	"github.com/txpull/bytecode/scanners"
+	"go.uber.org/zap"
 )
 
-// generateCmd represents the generate command
+type Contract struct {
+	Txhash          string
+	ContractAddress string
+	ContractName    string
+}
+
 var bscscanCmd = &cobra.Command{
 	Use:   "bscscan",
 	Short: "Process verified contracts from bscscan",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		bscscanPath := viper.GetString("bsc.crawler.bscscan_path")
+
+		if bscscanPath == "" {
+			currentDir, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			bscscanPath = path.Join(currentDir, "data", "bscscan")
+		}
+
+		bscscanVerifiedCsvPath := path.Join(bscscanPath, "verified-contracts.csv")
+		bscscanVerifiedOoutputPath := path.Join(bscscanPath, "verified-contracts.gob")
+
+		zap.L().Info(
+			"Starting to process bsc scan verified contracts...",
+			zap.String("bscscan-path", bscscanPath),
+			zap.String("bscscan-csv-path", bscscanVerifiedCsvPath),
+		)
+
+		// NewBscScanProvider creates a new instance of BscScanProvider with the provided API key and API URL.
+		bp := scanners.NewBscScanProvider(
+			viper.GetString("bscscan.api.url"),
+			viper.GetString("bscscan.api.key"),
+		)
+
+		crawler := bscscan_crawler.New(cmd.Context(), bp, bscscanVerifiedCsvPath, bscscanVerifiedOoutputPath)
+
+		contracts, err := crawler.GatherVerifiedContracts()
+		if err != nil {
+			return err
+		}
+
+		if err := crawler.ProcessVerifiedContracts(contracts); err != nil {
+			return err
+		}
+
+		zap.L().Info("Successfully processed verified contracts")
+
 		return nil
 	},
 }

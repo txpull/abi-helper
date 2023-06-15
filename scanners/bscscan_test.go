@@ -1,4 +1,4 @@
-package providers
+package scanners
 
 import (
 	"fmt"
@@ -83,8 +83,8 @@ func TestBscScanProvider_ScanContract(t *testing.T) {
 				}
 				t.Logf("Got result: %+v - addr: %s", result, tc.contractAddress)
 
-				if result.ContractName != tc.expectedName {
-					t.Errorf("unexpected contract name; got %s, want %s", result.ContractName, tc.expectedName)
+				if result.Name != tc.expectedName {
+					t.Errorf("unexpected contract name; got %s, want %s", result.Name, tc.expectedName)
 				}
 				if result.CompilerVersion != tc.expectedCompiler {
 					t.Errorf("unexpected compiler version; got %s, want %s", result.CompilerVersion, tc.expectedCompiler)

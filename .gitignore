@@ -22,7 +22,7 @@ go.work
 
 
 # Workspace related files
-.abi-helper.yaml
+.txbyte.yaml
 build/*
 *.go.prototype
 .test.env

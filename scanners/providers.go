@@ -1,7 +1,7 @@
 // Package providers implements contract scanner providers for BscScan and EtherScan APIs.
 // It provides the ability to scan a contract using different providers and retrieve contract information.
 // Each provider implements the Provider interface and can be used interchangeably.
-package providers
+package scanners
 
 // Provider interface defines the contract for a contract scanner provider.
 type Provider interface {

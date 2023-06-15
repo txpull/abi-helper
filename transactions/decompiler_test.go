@@ -35,16 +35,15 @@ func TestTransaction_DiscoverAndDecompile(t *testing.T) {
 	defer signaturesDb.Close()
 
 	i := 0
-
+	txns := ethReader.GetTransactions()
 	// Deliberately looping through the transactions instead of just looping through
 	// receipts in search for non 0x0 ContractAddress
-	for _, tx := range ethReader.GetTransactions() {
-		if i == 10 {
+	for _, tx := range txns {
+		if i == 1 {
 			break
 		}
 
 		log.Printf("Processing: %s \n", tx.Hash().Hex())
-		//  && tx.Hash().Hex() == "0x5665a9757366de98ead3948cceb75523f3116dcb92227ea03fb340a7adbd367c"
 		if tx.To() != nil {
 			receipt, found := ethReader.GetReceiptFromTxHash(tx.Hash())
 			tAssert.True(found)
@@ -76,7 +75,7 @@ func TestTransaction_DiscoverAndDecompile(t *testing.T) {
 						t.Logf("Signature Arg: %s \n", arg)
 					}
 
-					decompiler.DiscoverSignatureArguments()
+					decompiler.DiscoverSignatureArguments(signature)
 
 				}
 			}

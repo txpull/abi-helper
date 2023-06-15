@@ -1,4 +1,4 @@
-package providers
+package scanners
 
 import (
 	"encoding/json"
@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"strings"
 )
+
+// Default BscScan API URL
+const BSCSCAN_API_URL = "https://api.bscscan.com/api"
 
 // BscScanProvider represents the BscScan scanner provider.
 type BscScanProvider struct {

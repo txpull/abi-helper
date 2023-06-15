@@ -24,7 +24,6 @@ type Decompiler struct {
 	tx         *types.Transaction
 	decompiler *opcodes.Decompiler
 	signatures *signatures.Signatures
-	signature  *signatures.Signature
 }
 
 // NewDecompiler creates a new instance of the Decompiler struct.
@@ -127,19 +126,15 @@ func (d *Decompiler) DiscoverSignature() (*signatures.Signature, bool, error) {
 		return nil, false, ErrSignatureNotFound{Hex: methodID}
 	}
 
-	if found {
-		d.signature = signature
-	}
-
 	return signature, found, nil
 }
 
-func (d *Decompiler) DiscoverSignatureArguments() ([]MethodArgument, error) {
-	if d.signature == nil {
+func (d *Decompiler) DiscoverSignatureArguments(signature *signatures.Signature) ([]MethodArgument, error) {
+	if signature == nil {
 		return nil, ErrArgSignatureIsRequired
 	}
 
-	argTypes := d.GetMethodArgsFromSignature(d.signature)
+	argTypes := d.GetMethodArgsFromSignature(signature)
 
 	if len(argTypes) < 1 {
 		return nil, nil

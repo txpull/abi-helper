@@ -19,18 +19,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package syncers_cmd
 
 import (
 	"github.com/spf13/cobra"
 )
 
 // fixturesCmd represents the fixtures command
-var fixturesCmd = &cobra.Command{
-	Use:   "fixtures",
-	Short: "Commands related to obtaining unit test data",
+var syncerCmd = &cobra.Command{
+	Use:   "syncer",
+	Short: "Commands related to syncing data from third party sources",
 }
 
-func init() {
-	rootCmd.AddCommand(fixturesCmd)
+func Init(rootCmd *cobra.Command) {
+	rootCmd.AddCommand(syncerCmd)
+	syncerCmd.AddCommand(bscscanCmd)
 }

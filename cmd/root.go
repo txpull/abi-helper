@@ -27,13 +27,15 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	fixtures_cmd "github.com/txpull/bytecode/cmd/fixtures"
+	syncers_cmd "github.com/txpull/bytecode/cmd/syncers"
 )
 
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "abi-helper",
+	Use:   "txbyte",
 	Short: "A brief description of your application",
 }
 
@@ -48,20 +50,6 @@ func SetVersion(v string) {
 	version = v
 }
 
-func init() {
-	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.abi-helper.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
@@ -72,10 +60,10 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".abi-helper" (without extension).
+		// Search config in home directory with name ".txbyte" (with .yaml extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".abi-helper")
+		viper.SetConfigName(".txbyte")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -84,4 +72,20 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+
+	// Here you will define your flags and configuration settings.
+	// Cobra supports persistent flags, which, if defined here,
+	// will be global for your application.
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.txbyte.yaml)")
+
+	// Load syncers subcommands designed to sync data from third party sources
+	syncers_cmd.Init(rootCmd)
+
+	// Load fixtures subcommands designed to generate fixtures for testing purposes using mainnet nodes data
+	fixtures_cmd.Init(rootCmd)
 }

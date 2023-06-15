@@ -14,11 +14,12 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 ## Features
 
 - [x] Automatic fixtures (sample data) download direcly from (bsc|eth) mainnet used for tests.
-- [x] Optcode discovery from any contract bytecode that is deployed on the (bsc|eth) mainnets.
+- [x] Opcode discovery from any contract bytecode that is deployed on the (bsc|eth) mainnets.
 - [x] Reading signature database.
-- [x] Ability to get optcode for any transaction that contains appropriate data.
+- [x] Ability to get opcode for any transaction that contains appropriate data.
 - [x] Ability to potentially get transaction method id and arguments from contracts without abi.
 - [x] 3rd party contract code scanners (BscScan)
+- [x] Commands and utilities that can download and read verified contracts from bscscan.
 
 ## TODO
 

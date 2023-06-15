@@ -26,10 +26,10 @@ import (
 	"path"
 	"time"
 
-	"github.com/dgraph-io/badger/v4"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/txpull/bytecode/crawlers/fourbyte"
+	"github.com/txpull/bytecode/db"
 	"github.com/txpull/bytecode/scanners"
 	"go.uber.org/zap"
 )
@@ -50,26 +50,12 @@ var fourbyteCmd = &cobra.Command{
 
 		// Open the Badger database located in the databasePath directory.
 		// It will be created if it doesn't exist.
-		db, err := badger.Open(badger.DefaultOptions(databasePath))
+		bdb, err := db.NewBadgerDB(db.WithDbPath(databasePath))
 		if err != nil {
 			return err
 		}
-		defer db.Close()
-
-		// Garbage collect...
-		// TODO: Create badger package and have this under function!
-		go func(db *badger.DB) {
-			ticker := time.NewTicker(1 * time.Minute)
-			defer ticker.Stop()
-			for range ticker.C {
-			again:
-				zap.L().Info("Garbage collection of Badger database...")
-				err := db.RunValueLogGC(0.7)
-				if err == nil {
-					goto again
-				}
-			}
-		}(db)
+		defer bdb.Close()
+		go bdb.GarbageCollect()
 
 		provider := scanners.NewFourByteProvider(
 			scanners.WithURL("https://www.4byte.directory/api/v1/signatures/"), // Replace with your URL
@@ -80,7 +66,7 @@ var fourbyteCmd = &cobra.Command{
 		crawler := fourbyte.NewFourByteWritter(
 			fourbyte.WithContext(cmd.Context()),
 			fourbyte.WithProvider(provider),
-			fourbyte.WithDB(db),
+			fourbyte.WithDB(bdb),
 			fourbyte.WithCooldown(100*time.Millisecond),
 		)
 

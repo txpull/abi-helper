@@ -1,3 +1,5 @@
+// Package scanners provides the functionality to scan and interact with
+// the 4byte.directory API, a signature database of 4byte function signatures.
 package scanners
 
 import (
@@ -11,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Result structure
+// FourByteResult represents a single function signature entry.
 type FourByteResult struct {
 	ID        int       `json:"id"`
 	Text      string    `json:"text_signature"`
@@ -19,7 +21,7 @@ type FourByteResult struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// PageResponse structure
+// PageResponse is the structure of a response from the 4byte.directory API.
 type PageResponse struct {
 	Count    int              `json:"count"`
 	Next     string           `json:"next"`
@@ -27,6 +29,7 @@ type PageResponse struct {
 	Results  []FourByteResult `json:"results"`
 }
 
+// FourByteProvider is a client for interacting with the 4byte.directory API.
 type FourByteProvider struct {
 	client     http.Client
 	baseURL    string
@@ -34,26 +37,52 @@ type FourByteProvider struct {
 	ctx        context.Context
 }
 
+// Option is a function that applies a configuration option to a FourByteProvider.
 type Option func(*FourByteProvider)
 
+// WithURL is an Option to set the base URL of the 4byte.directory API.
+//
+// Example usage:
+//
+//	provider := NewFourByteProvider(WithURL("https://www.4byte.directory/api/v1/signatures/"))
 func WithURL(url string) Option {
 	return func(p *FourByteProvider) {
 		p.baseURL = url
 	}
 }
 
+// WithMaxRetries is an Option to set the maximum number of retries on network failure.
+//
+// Example usage:
+//
+//	provider := NewFourByteProvider(WithMaxRetries(5))
 func WithMaxRetries(maxRetries int) Option {
 	return func(p *FourByteProvider) {
 		p.maxRetries = maxRetries
 	}
 }
 
+// WithContext is an Option to set the context of the FourByteProvider.
+//
+// Example usage:
+//
+//	ctx := context.Background()
+//	provider := NewFourByteProvider(WithContext(ctx))
 func WithContext(ctx context.Context) Option {
 	return func(p *FourByteProvider) {
 		p.ctx = ctx
 	}
 }
 
+// NewFourByteProvider creates a new FourByteProvider instance with the provided Options.
+// It defaults to using a background context if no context is provided,
+// the default base URL is "https://www.4byte.directory/api/v1/signatures/",
+// and the default maximum number of retries on network failure is 3.
+//
+// Example usage:
+//
+//	ctx := context.Background()
+//	provider := NewFourByteProvider(WithContext(ctx), WithURL("https://www.4byte.directory/api/v1/signatures/"), WithMaxRetries(5))
 func NewFourByteProvider(opts ...Option) *FourByteProvider {
 	provider := &FourByteProvider{
 		client:     http.Client{Timeout: 10 * time.Second},
@@ -69,6 +98,12 @@ func NewFourByteProvider(opts ...Option) *FourByteProvider {
 	return provider
 }
 
+// GetPage retrieves a page of function signature entries from the 4byte.directory API.
+// If pageNum is 0, it retrieves the first page.
+//
+// Example usage:
+//
+//	pageResponse, err := provider.GetPage(1)
 func (p *FourByteProvider) GetPage(pageNum uint64) (*PageResponse, error) {
 	pageUrl := fmt.Sprintf("%s?page=%d", p.baseURL, pageNum)
 	if pageNum == 0 {

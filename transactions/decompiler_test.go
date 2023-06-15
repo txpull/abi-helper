@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/txpull/bytecode/clients"
+	"github.com/txpull/bytecode/db"
 	"github.com/txpull/bytecode/fixtures"
 	"github.com/txpull/bytecode/signatures"
 )
@@ -30,9 +31,16 @@ func TestTransaction_DiscoverAndDecompile(t *testing.T) {
 	tAssert.NoError(err)
 	tAssert.NotNil(clients)
 
-	signaturesDb, err := signatures.NewDb(ctx, os.Getenv("TEST_SIGNATURES_DB_PATH"))
+	// Create a new BadgerDB instance
+	bdb, err := db.NewBadgerDB(db.WithDbPath(os.Getenv("TEST_SIGNATURES_DB_PATH")))
 	tAssert.NoError(err)
-	defer signaturesDb.Close()
+	defer bdb.Close()
+	go bdb.GarbageCollect()
+
+	// Create a new SignaturesReader instance using the existing BadgerDB instance
+	signaturesDb := signatures.NewDb(
+		signatures.WithBadgerDB(bdb),
+	)
 
 	i := 0
 	txns := ethReader.GetTransactions()

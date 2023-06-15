@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgraph-io/badger/v4"
+	"github.com/txpull/bytecode/db"
 	"github.com/txpull/bytecode/scanners"
 	"github.com/txpull/bytecode/signatures"
 	"github.com/txpull/bytecode/utils"
@@ -23,7 +23,7 @@ const BDB_NAME_LAST_PROCESSED_PAGE_KEY = "last_processed_fourbyte_page_num"
 type FourByteWritter struct {
 	ctx      context.Context
 	provider *scanners.FourByteProvider
-	db       *badger.DB
+	db       *db.BadgerDB
 	cooldown time.Duration
 }
 
@@ -38,7 +38,7 @@ func WithProvider(provider *scanners.FourByteProvider) CrawlerOption {
 }
 
 // WithDB sets the BadgerDB for the FourByteWritter.
-func WithDB(db *badger.DB) CrawlerOption {
+func WithDB(db *db.BadgerDB) CrawlerOption {
 	return func(c *FourByteWritter) {
 		c.db = db
 	}
@@ -162,25 +162,20 @@ func (w *FourByteWritter) Crawl() error {
 // If the key is not found, it returns 0 as the last page number.
 func (w *FourByteWritter) getLastPageNum() (uint64, error) {
 	pageNum := uint64(1)
-	err := w.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(BDB_NAME_LAST_PROCESSED_PAGE_KEY))
+	exists, err := w.db.Exists(BDB_NAME_LAST_PROCESSED_PAGE_KEY)
+	if err != nil {
+		return 0, err
+	}
+
+	if exists {
+		val, err := w.db.Get(BDB_NAME_LAST_PROCESSED_PAGE_KEY)
 		if err != nil {
-			if err == badger.ErrKeyNotFound {
-				return nil // Key not found is not an error, it means we start from the first page.
-			}
-			return err
+			return 0, err
 		}
+		pageNum = binary.BigEndian.Uint64(val)
+	}
 
-		valCopy, err := item.ValueCopy(nil)
-		if err != nil {
-			return err
-		}
-
-		pageNum = binary.BigEndian.Uint64(valCopy)
-		return nil
-	})
-
-	return pageNum, err
+	return pageNum, nil
 }
 
 // setLastPageNum sets the last processed page number in BadgerDB.
@@ -188,11 +183,9 @@ func (w *FourByteWritter) getLastPageNum() (uint64, error) {
 // The setLastPageNum method sets the last processed page number in the BadgerDB instance.
 // It opens a transaction and stores the provided page number as a byte slice using the BDB_NAME_LAST_PROCESSED_PAGE_KEY key.
 func (w *FourByteWritter) setLastPageNum(pageNum uint64) error {
-	return w.db.Update(func(txn *badger.Txn) error {
-		val := make([]byte, 8)
-		binary.BigEndian.PutUint64(val, pageNum)
-		return txn.Set([]byte(BDB_NAME_LAST_PROCESSED_PAGE_KEY), val)
-	})
+	val := make([]byte, 8)
+	binary.BigEndian.PutUint64(val, pageNum)
+	return w.db.Write(BDB_NAME_LAST_PROCESSED_PAGE_KEY, val)
 }
 
 // saveSignatureIfNotExists saves the signature to the database if it doesn't already exist.
@@ -222,22 +215,7 @@ func (w *FourByteWritter) saveSignatureIfNotExists(signature *signatures.Signatu
 // It opens a transaction and attempts to retrieve the value associated with the signature's hex string.
 // If the key is not found, it returns false, indicating that the signature does not exist.
 func (w *FourByteWritter) signatureExists(signature *signatures.Signature) (bool, error) {
-	exists := false
-
-	err := w.db.View(func(txn *badger.Txn) error {
-		_, err := txn.Get([]byte(signature.Hex))
-		if err != nil {
-			if err == badger.ErrKeyNotFound {
-				return nil // Key not found means the signature does not exist.
-			}
-			return err
-		}
-
-		// Key found, signature exists.
-		exists = true
-		return nil
-	})
-
+	exists, err := w.db.Exists(signature.Hex)
 	if err != nil {
 		return false, err
 	}
@@ -249,28 +227,15 @@ func (w *FourByteWritter) signatureExists(signature *signatures.Signature) (bool
 //
 // The saveSignature method saves the given signature to the database.
 // It opens a transaction, marshals the signature to JSON bytes, and stores the byte slice using the signature's hex string as the key.
+// saveSignature saves the signature to the database.
 func (w *FourByteWritter) saveSignature(signature *signatures.Signature) error {
-	err := w.db.Update(func(txn *badger.Txn) error {
-		// Marshal the signature to JSON bytes.
-		signatureBytes, err := signature.MarshalBytes()
-		if err != nil {
-			return err
-		}
-
-		// Save the signature to BadgerDB with the signature ID as the key.
-		err = txn.Set([]byte(signature.Hex), signatureBytes)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
-
+	signatureBytes, err := signature.MarshalBytes()
 	if err != nil {
 		return err
 	}
 
-	return nil
+	// Save the signature to BadgerDB with the signature ID as the key.
+	return w.db.Write(signature.Hex, signatureBytes)
 }
 
 // extractPageNumFromURL extracts the page number from a URL.

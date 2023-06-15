@@ -1,0 +1,11 @@
+eth:
+  node:
+    url: "xxx"
+    concurrent_clients_number: 3
+  generator:
+    start_block_number: 28977150
+    end_block_number: 28978170
+bscscan:
+  api:
+    url: "https://api.bscscan.com/api"
+    key: "xxx"

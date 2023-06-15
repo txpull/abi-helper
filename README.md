@@ -32,6 +32,24 @@ List of the bugs that I have discovered and will be resolving can be found here 
 If you discover any bugs, please use issues to report. Thanks!
 
 
+## Configuration
+
+The `bytecode` can be configured using a config file (default: `.txbyte.yaml`) and environment variables. 
+
+You can see sample configuration file at [.txpull.config.sample.yml].
+
+The following configuration options are available:
+
+- `eth.node.url`: Ethereum-based node full URL.
+- `bscscan.api.url`: BscScan API URL.
+- `bscscan.api.key`: BscScan API key.
+- `bsc.crawler.bscscan_path`: Path for storing BscScan data (default: `data/bscscan`).
+- `eth.node.concurrent_clients_number`: Number of concurrent node clients to spawn.
+- `eth.generator.fixtures_path`: Path for storing Ethereum fixtures (default: `data/fixtures`).
+- `eth.generator.start_block_number`: Start block number for generating fixtures.
+- `eth.generator.end_block_number`: End block number for generating fixtures.
+
+
 ## Installation
 
 To install the bytecode, follow these steps:
@@ -42,9 +60,11 @@ To install the bytecode, follow these steps:
 
 For preparation and how-to fetch data and get this repository going on the right way visit [INSTALL.md].
 
-## Usage
+---
 
-The `bytecode` provides the following commands:
+## CLI Usage
+
+The `bytecode` provides the following CLI commands:
 
 ### Command: txbyte
 
@@ -58,8 +78,6 @@ Displays the current version of the application.
 
 Usage: `txbyte version`
 
-
-
 ### Command: syncer
 
 Commands related to syncing data from third-party sources.
@@ -70,23 +88,7 @@ Replace `<subcommand>` with one of the following:
 - `bscscan`: Process verified contracts from bscscan.
 - `fourbyte`: Download, process, and store signatures from 4byte.directory.
 
-
-## Configuration
-
-The Application Name can be configured using a config file (default: `.txbyte.yaml`) and environment variables. The following configuration options are available:
-
-- `config`: Path to the config file (default: `$HOME/.txbyte.yaml`).
-- `bsc.crawler.bscscan_path`: Path for storing BscScan data (default: `data/bscscan`).
-- `bscscan.api.url`: BscScan API URL.
-- `bscscan.api.key`: BscScan API key.
-- `eth.generator.fixtures_path`: Path for storing Ethereum fixtures (default: `data/fixtures`).
-- `eth.node.url`: Ethereum-based node full URL.
-- `eth.node.concurrent_clients_number`: Number of concurrent node clients to spawn.
-- `eth.generator.start_block_number`: Start block number for generating fixtures.
-- `eth.generator.end_block_number`: End block number for generating fixtures.
-
-Refer to the config file or environment variables for configuring the Application Name.
-
+---
 
 ## Testing
 
@@ -149,3 +151,4 @@ The Application Name is licensed under the MIT License. See the `LICENSE` file f
 [INSTALL.md]: </docs/INSTALL.md>
 [BUGS.md]: <BUGS.md>
 [TODO.md]: <TODO.md>
+[.txpull.config.sample.yml]: <.txpull.config.sample.yml>

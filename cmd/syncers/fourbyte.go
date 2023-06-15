@@ -56,6 +56,20 @@ var fourbyteCmd = &cobra.Command{
 		}
 		defer db.Close()
 
+		// Garbage collect...
+		// TODO: Create badger package and have this under function!
+		go func(db *badger.DB) {
+			ticker := time.NewTicker(1 * time.Minute)
+			defer ticker.Stop()
+			for range ticker.C {
+			again:
+				err := db.RunValueLogGC(0.7)
+				if err == nil {
+					goto again
+				}
+			}
+		}(db)
+
 		provider := scanners.NewFourByteProvider(
 			scanners.WithURL("https://www.4byte.directory/api/v1/signatures/"), // Replace with your URL
 			scanners.WithMaxRetries(3),

@@ -21,7 +21,10 @@ Daily verified contracts can be seen at [BscScan Daily Verified Contracts].
 Following command will look into `/data/bscscan/verified-contracts.csv` and fetch all of contracts
 in the CSV into `/data/bscscan/verified-contracts.gob` for future processing. On that subject I will speak later.
 
-**WARN: You can download with free API key but probably you will require bscscan subscription to get all of these data.**
+**WARNINGS:**
+
+- You can download contract information with free API key but probably you will need bscscan subscription to get all of these data smoothly and not to be heavily rate limited. Rate limit 1st paid subscription level is small as well (10/s).
+- You will need manually to download CSV files in time to time. I will be doing it as well but if I miss it, well you'll have to do it and replace files. There is no automatic way to download the csv as it's behind the captcha.
 
 ```
 txbyte syncer bscscan --config ./.txbyte.yaml

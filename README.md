@@ -23,18 +23,13 @@ Set of tools to help decoding bytecode, transactions, blocks, receipts and logs 
 
 ## TODO
 
-- [ ] Extract compiler information from transaction contract creation data if available.
-- [ ] Extract contract deployment constructor information.
-- [ ] Extract contract swarm ipfs/bzz information.
-- [ ] Extract contract abi from (3rd-party, metadata, reverse engineering bytecode)
-- [ ] Extend signatures to download new signatures from 4byte.dictionary and other services including parsing abis and writing signatures from abis.
+For now this section is here and is related to things still needs to be completed. List that will be changing sometimes daily can be found at [TODO.md].
 
 
 ## BUGS
 
-Just a list for me to fix it while developing without opening tickets
-
-- [ ] Argument decoding works to a point, should be fixed
+List of the bugs that I have discovered and will be resolving can be found here at [BUGS.md].
+If you discover any bugs, please use issues to report. Thanks!
 
 
 ## Installation
@@ -44,6 +39,8 @@ To install the bytecode, follow these steps:
 1. Clone the repository: `git clone https://github.com/txpull/bytecode.git`
 2. Navigate to the project directory: `cd bytecode`
 3. Build the binary: `make install`
+
+For preparation and how-to fetch data and get this repository going on the right way visit [INSTALL.md].
 
 ## Usage
 
@@ -143,3 +140,8 @@ PASS
 ## License
 
 The Application Name is licensed under the MIT License. See the `LICENSE` file for more details.
+
+
+[INSTALL.md]: </docs/INSTALL.md>
+[BUGS.md]: <BUGS.md>
+[TODO.md]: <TODO.md>

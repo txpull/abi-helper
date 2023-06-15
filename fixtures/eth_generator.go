@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/txpull/bytecode/clients"
+	"github.com/txpull/bytecode/utils"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -115,7 +116,7 @@ func (e *EthGenerator) Write() error {
 		return err
 	}
 
-	if err := writeGob(blocksPath, e.blocks); err != nil {
+	if err := utils.WriteGob(blocksPath, e.blocks); err != nil {
 		zap.L().Error(
 			"failed to write RLP encoded blocks",
 			zap.Error(err),

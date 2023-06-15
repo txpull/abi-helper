@@ -34,4 +34,5 @@ var syncerCmd = &cobra.Command{
 func Init(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(syncerCmd)
 	syncerCmd.AddCommand(bscscanCmd)
+	syncerCmd.AddCommand(fourbyteCmd)
 }

@@ -68,7 +68,7 @@ func TestTransaction_DiscoverAndDecompile(t *testing.T) {
 				signature, found, err := decompiler.DiscoverSignature()
 				if err == nil && found {
 					tAssert.IsType(&signatures.Signature{}, signature)
-					t.Logf("Signature: %s", signature.TextSignature)
+					t.Logf("Signature: %s", signature.Text)
 
 					args := decompiler.GetMethodArgsFromSignature(signature)
 					for _, arg := range args {

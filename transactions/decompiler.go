@@ -23,13 +23,13 @@ type Decompiler struct {
 	ctx        context.Context
 	tx         *types.Transaction
 	decompiler *opcodes.Decompiler
-	signatures *signatures.Signatures
+	signatures *signatures.SignaturesReader
 }
 
 // NewDecompiler creates a new instance of the Decompiler struct.
 // It takes a context and a types.Transaction object as input parameters.
 // It returns a pointer to the created Decompiler object and an error.
-func NewDecompiler(ctx context.Context, tx *types.Transaction, s *signatures.Signatures) (*Decompiler, error) {
+func NewDecompiler(ctx context.Context, tx *types.Transaction, s *signatures.SignaturesReader) (*Decompiler, error) {
 	opcode, err := opcodes.NewDecompiler(ctx, tx.Data())
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (d *Decompiler) GetMethodArgsBytes() []byte {
 }
 
 func (d *Decompiler) GetMethodArgsFromSignature(s *signatures.Signature) map[int64]string {
-	return extractArgumentTypes(s.TextSignature)
+	return extractArgumentTypes(s.Text)
 }
 
 func (d *Decompiler) GetDataSlice() []string {

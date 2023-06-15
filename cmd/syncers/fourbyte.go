@@ -24,55 +24,56 @@ package syncers_cmd
 import (
 	"os"
 	"path"
+	"time"
 
+	"github.com/dgraph-io/badger/v4"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	bscscan_crawler "github.com/txpull/bytecode/crawlers/bscscan"
+	"github.com/txpull/bytecode/crawlers/fourbyte"
 	"github.com/txpull/bytecode/scanners"
 	"go.uber.org/zap"
 )
 
-var bscscanCmd = &cobra.Command{
-	Use:   "bscscan",
-	Short: "Process verified contracts from bscscan",
+var fourbyteCmd = &cobra.Command{
+	Use:   "fourbyte",
+	Short: "Download, process and store signatures from 4byte.directory",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bscscanPath := viper.GetString("bsc.crawler.bscscan_path")
+		databasePath := viper.GetString("fourbyte.crawler.database_path")
 
-		if bscscanPath == "" {
+		if databasePath == "" {
 			currentDir, err := os.Getwd()
 			if err != nil {
 				return err
 			}
-			bscscanPath = path.Join(currentDir, "data", "bscscan")
+			databasePath = path.Join(currentDir, "data", "signatures")
 		}
 
-		bscscanVerifiedCsvPath := path.Join(bscscanPath, "verified-contracts.csv")
-		bscscanVerifiedOoutputPath := path.Join(bscscanPath, "verified-contracts.gob")
-
-		zap.L().Info(
-			"Starting to process bsc scan verified contracts...",
-			zap.String("bscscan-path", bscscanPath),
-			zap.String("bscscan-csv-path", bscscanVerifiedCsvPath),
-		)
-
-		// NewBscScanProvider creates a new instance of BscScanProvider with the provided API key and API URL.
-		bp := scanners.NewBscScanProvider(
-			viper.GetString("bscscan.api.url"),
-			viper.GetString("bscscan.api.key"),
-		)
-
-		crawler := bscscan_crawler.New(cmd.Context(), bp, bscscanVerifiedCsvPath, bscscanVerifiedOoutputPath)
-
-		contracts, err := crawler.GatherVerifiedContracts()
+		// Open the Badger database located in the databasePath directory.
+		// It will be created if it doesn't exist.
+		db, err := badger.Open(badger.DefaultOptions(databasePath))
 		if err != nil {
 			return err
 		}
+		defer db.Close()
 
-		if err := crawler.ProcessVerifiedContracts(contracts); err != nil {
+		provider := scanners.NewFourByteProvider(
+			scanners.WithURL("https://www.4byte.directory/api/v1/signatures/"), // Replace with your URL
+			scanners.WithMaxRetries(3),
+			scanners.WithContext(cmd.Context()),
+		)
+
+		crawler := fourbyte.NewFourByteWritter(
+			fourbyte.WithContext(cmd.Context()),
+			fourbyte.WithProvider(provider),
+			fourbyte.WithDB(db),
+			fourbyte.WithCooldown(400*time.Millisecond),
+		)
+
+		if err := crawler.Crawl(); err != nil {
 			return err
 		}
 
-		zap.L().Info("Successfully processed verified contracts")
+		zap.L().Info("Successfully processed 4byte.dictionary signatures")
 
 		return nil
 	},

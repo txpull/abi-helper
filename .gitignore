@@ -26,3 +26,4 @@ go.work
 build/*
 *.go.prototype
 .test.env
+data/bscscan/verified-contracts.gob

@@ -3,48 +3,57 @@ package signatures
 
 import (
 	"context"
-	"database/sql"
-	"errors"
+	"log"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3" // Import SQLite3 driver
+	"github.com/dgraph-io/badger/v4"
 )
 
 // Signatures represents a collection of signatures and provides methods for interacting with them.
-type Signatures struct {
-	db *sql.DB
+type SignaturesReader struct {
+	db *badger.DB
 }
 
 // Close closes the underlying database connection.
-func (s *Signatures) Close() error {
+func (s *SignaturesReader) Close() error {
 	return s.db.Close()
 }
 
 // LookupByHex retrieves a signature based on the provided hex value.
-// It returns a pointer to a Signature struct if found, bool as signature found or not and/or an error if the signature is not found or an error occurs.
-func (s *Signatures) LookupByHex(hexSignature string) (*Signature, bool, error) {
-	if !strings.HasPrefix(hexSignature, "0x") {
-		hexSignature = "0x" + hexSignature
-	}
+// It returns a pointer to a Signature struct if found, a boolean indicating if the signature is found, and an error if the signature is not found or an error occurs.
+func (s *SignaturesReader) LookupByHex(hexSignature string) (*Signature, bool, error) {
+	var signature *Signature
 
-	query := "SELECT id, text_signature, hex_signature, bytes, created_at FROM signatures WHERE hex_signature = ?"
-	row := s.db.QueryRow(query, hexSignature)
+	// Make sure we don't look it by a hex string with a leading "0x".
+	hexSignature = strings.TrimLeft(hexSignature, "0x")
 
-	signature := &Signature{}
-	err := row.Scan(
-		&signature.ID,
-		&signature.TextSignature,
-		&signature.HexSignature,
-		&signature.Bytes,
-		&signature.CreatedAt,
-	)
+	err := s.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get([]byte(hexSignature))
+		if err != nil {
+			if err == badger.ErrKeyNotFound {
+				return nil // Key not found means the signature does not exist.
+			}
+			return err
+		}
 
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, false, SignatureNotFound{HexSignature: hexSignature}
-	}
+		value, err := item.ValueCopy(nil)
+		if err != nil {
+			return err
+		}
+
+		if err := signature.UnmarshalBytes(value); err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	if err != nil {
 		return nil, false, err
+	}
+
+	if signature == nil {
+		return nil, false, nil
 	}
 
 	return signature, true, nil
@@ -52,22 +61,16 @@ func (s *Signatures) LookupByHex(hexSignature string) (*Signature, bool, error) 
 
 // NewDb opens a connection to the SQLite3 database specified by dbLocation and returns a new instance of Signatures.
 // It verifies the connection by pinging the database and returns an error if the connection fails.
-func NewDb(ctx context.Context, dbLocation string) (*Signatures, error) {
-	// Load the SQLite3 database file
-	db, err := sql.Open("sqlite3", dbLocation)
+func NewDb(ctx context.Context, dbLocation string) (*SignaturesReader, error) {
+	// Open the Badger database located in the dbLocation directory.
+	// It will be created if it doesn't exist.
+	db, err := badger.Open(badger.DefaultOptions(dbLocation))
 	if err != nil {
-		return nil, err
-	}
-
-	// Ping the database to ensure connection
-	err = db.PingContext(ctx)
-	if err != nil {
-		db.Close()
-		return nil, err
+		log.Fatal(err)
 	}
 
 	// Create a new instance of Signatures struct
-	signatures := &Signatures{
+	signatures := &SignaturesReader{
 		db: db,
 	}
 

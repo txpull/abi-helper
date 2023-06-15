@@ -19,48 +19,86 @@ import (
 // BDB_NAME_LAST_PROCESSED_PAGE_KEY is the key for the last processed page number in BadgerDB.
 const BDB_NAME_LAST_PROCESSED_PAGE_KEY = "last_processed_fourbyte_page_num"
 
-// FourByteWritter crawls and processes pages, saving signatures to the database.
+// FourByteWritter provides a crawler which processes pages and saves signatures to a BadgerDB.
 type FourByteWritter struct {
-	ctx      context.Context
-	provider *scanners.FourByteProvider
-	db       *db.BadgerDB
-	cooldown time.Duration
+	ctx      context.Context            // Context to control the crawling process.
+	provider *scanners.FourByteProvider // Provider used to fetch pages.
+	db       *db.BadgerDB               // BadgerDB instance for storing signatures.
+	cooldown time.Duration              // Cooldown duration between page fetches.
 }
 
-// CrawlerOption is a functional option to customize the FourByteWritter.
-type CrawlerOption func(*FourByteWritter)
+// WritterOption is a functional option for customizing the FourByteWritter.
+type WritterOption func(*FourByteWritter)
 
 // WithProvider sets the FourByteProvider for the FourByteWritter.
-func WithProvider(provider *scanners.FourByteProvider) CrawlerOption {
+//
+// Example:
+//
+//		provider := scanners.NewFourByteProvider(httpClient)
+//	 crawler := NewFourByteWritter(WithProvider(provider))
+func WithProvider(provider *scanners.FourByteProvider) WritterOption {
 	return func(c *FourByteWritter) {
 		c.provider = provider
 	}
 }
 
 // WithDB sets the BadgerDB for the FourByteWritter.
-func WithDB(db *db.BadgerDB) CrawlerOption {
+//
+// Example:
+//
+//	db, _ := db.NewBadgerDB(db.WithContext(ctx), db.WithDbPath("/tmp/mydb"))
+//	crawler := NewFourByteWritter(WithDB(db))
+func WithDB(db *db.BadgerDB) WritterOption {
 	return func(c *FourByteWritter) {
 		c.db = db
 	}
 }
 
 // WithContext sets the context for the FourByteWritter.
-func WithContext(ctx context.Context) CrawlerOption {
+//
+// Example:
+//
+//	ctx, cancel := context.WithCancel(context.Background())
+//	crawler := NewFourByteWritter(WithContext(ctx))
+//	defer cancel()
+func WithContext(ctx context.Context) WritterOption {
 	return func(c *FourByteWritter) {
 		c.ctx = ctx
 	}
 }
 
 // WithCooldown sets the cooldown duration between crawling iterations.
-func WithCooldown(cooldown time.Duration) CrawlerOption {
+//
+// Example:
+//
+//	crawler := NewFourByteWritter(WithCooldown(1 * time.Second))
+func WithCooldown(cooldown time.Duration) WritterOption {
 	return func(c *FourByteWritter) {
 		c.cooldown = cooldown
 	}
 }
 
 // NewFourByteWritter creates a new FourByteWritter instance with the provided options.
-func NewFourByteWritter(opts ...CrawlerOption) *FourByteWritter {
-	crawler := &FourByteWritter{
+//
+// By default, FourByteWritter uses a background context and a cooldown period of 200ms.
+// Options can be provided to change these defaults or to set the FourByteProvider and the BadgerDB instance.
+//
+// Example:
+//
+//	ctx, cancel := context.WithCancel(context.Background())
+//	defer cancel()
+//
+//	db, _ := db.NewBadgerDB(db.WithContext(ctx), db.WithDbPath("/tmp/mydb"))
+//	provider := scanners.NewFourByteProvider(httpClient)
+//
+//	writter := NewFourByteWritter(
+//		WithContext(ctx),
+//		WithDB(db),
+//		WithProvider(provider),
+//		WithCooldown(1 * time.Second),
+//	)
+func NewFourByteWritter(opts ...WritterOption) *FourByteWritter {
+	writter := &FourByteWritter{
 		ctx:      context.Background(),
 		provider: nil,
 		db:       nil,
@@ -68,25 +106,30 @@ func NewFourByteWritter(opts ...CrawlerOption) *FourByteWritter {
 	}
 
 	for _, opt := range opts {
-		opt(crawler)
+		opt(writter)
 	}
-
-	return crawler
+	return writter
 }
 
 // Crawl starts crawling and processing pages.
 //
-// The Crawl method initiates the crawling process, retrieving and processing pages until there are no more pages to process. It utilizes the FourByteProvider to fetch pages and saves the extracted signatures to the specified database using the BadgerDB instance.
-// The crawling process includes the following steps:
-// - Get the last processed page number from the BadgerDB.
-// - Process each page:
-//   - Get the page using the FourByteProvider.
-//   - Extract signatures from the page content.
-//   - Save each signature to the database if it doesn't already exist.
-//   - Update the last page number in the BadgerDB.
-//   - Sleep for a cooldown period between iterations.
+// It follows these steps:
 //
-// - Upon completion, the method logs the last processed page number and returns any encountered errors.
+// 1. Retrieves the last processed page number from the BadgerDB.
+// 2. Begins fetching and processing each page from the source (using FourByteProvider).
+// 3. Extracts signatures from the page content.
+// 4. Saves each unique signature to the database.
+// 5. Updates the last processed page number in the BadgerDB.
+// 6. Sleeps for a cooldown period between iterations.
+//
+// This method will continue until all pages have been processed.
+//
+// Example:
+//
+//	err := crawler.Crawl()
+//	if err != nil {
+//		log.Fatal("Failed to crawl pages", zap.Error(err))
+//	}
 func (w *FourByteWritter) Crawl() error {
 	// Get the last page number from the BadgerDB.
 	pageNum, err := w.getLastPageNum()

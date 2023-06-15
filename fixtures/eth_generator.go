@@ -129,7 +129,7 @@ func (e *EthGenerator) Write() error {
 		return err
 	}
 
-	if err := writeGob(txPath, e.transactions); err != nil {
+	if err := utils.WriteGob(txPath, e.transactions); err != nil {
 		zap.L().Error(
 			"failed to write RLP encoded block transactions",
 			zap.Error(err),
@@ -142,7 +142,7 @@ func (e *EthGenerator) Write() error {
 		return err
 	}
 
-	if err := writeGob(receiptPath, e.receipts); err != nil {
+	if err := utils.WriteGob(receiptPath, e.receipts); err != nil {
 		zap.L().Error(
 			"failed to write RLP encoded transaction receipts",
 			zap.Error(err),

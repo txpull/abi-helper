@@ -1,6 +1,6 @@
 # Bytecode Installation Instructions
 
-As a set of tools designed to deal with blockchain, it's natural to understand that we're talking about a lot of the data.
+As a set of tools designed to deal with blockchain data. Please be aware that we're talking about a lot of the data. Later on I will give approximate insight into how much space you will need to squeze full potential of this repository.
 
 Initial idea was to have data directly placed under the `data/` path, however, some of the data, such
 as contracts, signatures can be quite large and therefore, these datasets you will need to obtain manually.

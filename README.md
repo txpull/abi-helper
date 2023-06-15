@@ -10,7 +10,6 @@ By it, everything about this project can change including the repository name. M
 
 I am on a weekly basis implementing different aspects, rearranging existing packages and working towards something that will be useful for txpull overall and wider audiences.
 
-
 ## Supported Chains
 
 - [x] BSC (Binance Smart Chain)
@@ -20,17 +19,16 @@ I am on a weekly basis implementing different aspects, rearranging existing pack
 ## Features
 
 - [x] Automatic fixtures (sample data) download direcly from (bsc|eth) mainnet used for tests.
-- [x] Opcode discovery from any contract bytecode that is deployed on the (bsc|eth) mainnets.
+- [x] Opcode discovery from any contract `bytecode` that is deployed on the (bsc|eth) mainnets.
 - [x] Reading signature database.
 - [x] Ability to get opcode for any transaction that contains appropriate data.
 - [x] Ability to potentially get transaction method id and arguments from contracts without abi.
-- [x] 3rd party contract code scanners (BscScan)
+- [x] 3rd party contract code scanners (BscScan).
 - [x] Commands and utilities that can download and read verified contracts from bscscan.
 
 ## TODO
 
 For now this section is here and is related to things still needs to be completed. List that will be changing sometimes daily can be found at [TODO.md].
-
 
 ## BUGS
 
@@ -153,7 +151,6 @@ PASS
 ## License
 
 The bytecode is licensed under the MIT License. See the [LICENSE] file for more details.
-
 
 [INSTALL.md]: </docs/INSTALL.md>
 [BUGS.md]: <BUGS.md>

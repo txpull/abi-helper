@@ -3,7 +3,6 @@ package signatures
 
 import (
 	"context"
-	"log"
 	"strings"
 
 	"github.com/dgraph-io/badger/v4"
@@ -59,19 +58,30 @@ func (s *SignaturesReader) LookupByHex(hexSignature string) (*Signature, bool, e
 	return signature, true, nil
 }
 
-// NewDb opens a connection to the SQLite3 database specified by dbLocation and returns a new instance of Signatures.
-// It verifies the connection by pinging the database and returns an error if the connection fails.
+// NewDb opens a connection to the BadgerDB specified by dbLocation and returns a new instance of SignaturesReader.
+// It verifies the connection by performing a database operation and returns an error if the connection fails.
 func NewDb(ctx context.Context, dbLocation string) (*SignaturesReader, error) {
-	// Open the Badger database located in the dbLocation directory.
+	// Open the BadgerDB located in the dbLocation directory.
 	// It will be created if it doesn't exist.
 	db, err := badger.Open(badger.DefaultOptions(dbLocation))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	// Create a new instance of Signatures struct
+	// Create a new instance of SignaturesReader struct.
 	signatures := &SignaturesReader{
 		db: db,
+	}
+
+	// Perform a database operation to verify the connection.
+	err = db.View(func(txn *badger.Txn) error {
+		_, err := txn.Get([]byte("ping"))
+		return err
+	})
+
+	if err != nil {
+		db.Close()
+		return nil, err
 	}
 
 	return signatures, nil

@@ -63,6 +63,7 @@ var fourbyteCmd = &cobra.Command{
 			defer ticker.Stop()
 			for range ticker.C {
 			again:
+				zap.L().Info("Garbage collection of Badger database...")
 				err := db.RunValueLogGC(0.7)
 				if err == nil {
 					goto again
@@ -80,7 +81,7 @@ var fourbyteCmd = &cobra.Command{
 			fourbyte.WithContext(cmd.Context()),
 			fourbyte.WithProvider(provider),
 			fourbyte.WithDB(db),
-			fourbyte.WithCooldown(400*time.Millisecond),
+			fourbyte.WithCooldown(100*time.Millisecond),
 		)
 
 		if err := crawler.Crawl(); err != nil {

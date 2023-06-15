@@ -58,17 +58,7 @@ Displays the current version of the application.
 
 Usage: `txbyte version`
 
-### Command: generate-eth
 
-Generates Ethereum-based fixtures and writes them into (block|transactions|receipt).gob files.
-
-Usage: `txbyte fixtures generate-eth --eth.node.url <node-url> --eth.node.concurrent_clients_number <num> --eth.generator.start_block_number <start-block> --eth.generator.end_block_number <end-block>`
-
-Replace the following parameters:
-- `<node-url>`: Ethereum-based node full URL (example: https://node-url:port).
-- `<num>`: Number of concurrent node clients to spawn.
-- `<start-block>`: Start block number for generating fixtures.
-- `<end-block>`: End block number for generating fixtures.
 
 ### Command: syncer
 
@@ -80,14 +70,6 @@ Replace `<subcommand>` with one of the following:
 - `bscscan`: Process verified contracts from bscscan.
 - `fourbyte`: Download, process, and store signatures from 4byte.directory.
 
-### Command: fixtures
-
-Commands related to obtaining unit test data.
-
-Usage: `txbyte fixtures <subcommand>`
-
-Replace `<subcommand>` with one of the following:
-- `generate-eth`: Generate Ethereum-based fixtures and write them into (block|transactions|receipt).gob files.
 
 ## Configuration
 
@@ -115,6 +97,28 @@ ethereum and/or bsc network. If you don't have your own node, you can find free 
 
 - Binance Smart Chain: https://chainlist.org/chain/56
 - Ethereum: https://chainlist.org/chain/1
+
+### Command: fixtures
+
+Commands related to obtaining unit test data.
+
+Usage: `txbyte fixtures <subcommand>`
+
+Replace `<subcommand>` with one of the following:
+- `generate-eth`: Generate Ethereum-based fixtures and write them into (block|transactions|receipt).gob files.
+
+### Command: generate-eth
+
+Generates Ethereum-based fixtures and writes them into (block|transactions|receipt).gob files.
+These files are currently used for ETH and BSC tests.
+
+Usage: `txbyte fixtures generate-eth --eth.node.url <node-url> --eth.node.concurrent_clients_number <num> --eth.generator.start_block_number <start-block> --eth.generator.end_block_number <end-block>`
+
+Replace the following parameters:
+- `<node-url>`: Ethereum-based node full URL (example: https://node-url:port).
+- `<num>`: Number of concurrent node clients to spawn.
+- `<start-block>`: Start block number for generating fixtures.
+- `<end-block>`: End block number for generating fixtures.
 
 
 ### Running Tests

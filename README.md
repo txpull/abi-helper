@@ -53,7 +53,7 @@ The `bytecode` provides the following commands:
 
 This is the base command for the application.
 
-Usage: `txbyte txbyte`
+Usage: `txbyte <command>`
 
 ### Command: version
 

@@ -31,6 +31,7 @@ For now this section is here and is related to things still needs to be complete
 List of the bugs that I have discovered and will be resolving can be found here at [BUGS.md].
 If you discover any bugs, please use issues to report. Thanks!
 
+---
 
 ## Configuration
 

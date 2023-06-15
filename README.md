@@ -152,10 +152,11 @@ PASS
 
 ## License
 
-The Application Name is licensed under the MIT License. See the `LICENSE` file for more details.
+The bytecode is licensed under the MIT License. See the [LICENSE] file for more details.
 
 
 [INSTALL.md]: </docs/INSTALL.md>
 [BUGS.md]: <BUGS.md>
 [TODO.md]: <TODO.md>
+[LICENSE]: <LICENSE>
 [.txpull.config.sample.yml]: <.txpull.config.sample.yml>

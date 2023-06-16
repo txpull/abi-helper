@@ -117,11 +117,7 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		return nil, ErrMissingReceipt
 	}
 
-	runtimeDecompiler, err := opcodes.NewDecompiler(c.ctx, tx.Data())
-	if err != nil {
-		zap.L().Error("failed to create transaction decompiler", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
-		return nil, err
-	}
+	runtimeDecompiler := opcodes.NewDecompiler(c.ctx, tx.Data())
 
 	if err := runtimeDecompiler.Decompile(); err != nil {
 		zap.L().Error("failed to decompile transaction", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
@@ -135,11 +131,7 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		return nil, err
 	}
 
-	decompiler, err := opcodes.NewDecompiler(c.ctx, bytecode)
-	if err != nil {
-		zap.L().Error("failed to create transaction decompiler", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
-		return nil, err
-	}
+	decompiler := opcodes.NewDecompiler(c.ctx, bytecode)
 
 	return &ContractCreationTxResult{
 		BlockNumber:         block.Number(),

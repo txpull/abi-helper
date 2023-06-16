@@ -42,7 +42,7 @@ func TestOptcode_DiscoverAndDecompile(t *testing.T) {
 			tAssert.NoError(err)
 			tAssert.GreaterOrEqual(len(bytes), 1)
 
-			decompiler, err := NewDecompiler(context.TODO(), bytes)
+			decompiler := NewDecompiler(context.TODO(), bytes)
 			tAssert.NoError(err)
 			tAssert.NotNil(decompiler)
 			tAssert.IsType(&Decompiler{}, decompiler)

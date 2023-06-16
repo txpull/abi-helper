@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -33,6 +32,24 @@ type Instruction struct {
 	Offset int
 	OpCode OpCode
 	Args   []byte
+}
+
+// NewDecompiler creates a new Decompiler instance with the provided context and bytecode.
+// The bytecode is not automatically decompiled; Decompile() must be called before any
+// information can be retrieved from the decompiler.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	if err := d.Decompile(); err != nil {
+//	  log.Fatal(err)
+//	}
+func NewDecompiler(ctx context.Context, b []byte) *Decompiler {
+	return &Decompiler{
+		ctx:          ctx,
+		bytecode:     b,
+		bytecodeSize: uint64(len(b)),
+		instructions: []Instruction{},
+	}
 }
 
 // SetBytecode sets the bytecode that the decompiler should work on. It also
@@ -132,13 +149,13 @@ func (d *Decompiler) MatchFunctionSignature(signature string) bool {
 //	d.Decompile()
 //	instructions := d.GetInstructionsByOpCode(opcodes.PUSH1)
 func (d *Decompiler) GetInstructionsByOpCode(op OpCode) []Instruction {
-	var callInstructions []Instruction
+	var instructions []Instruction
 	for _, instruction := range d.instructions {
 		if instruction.OpCode == op {
-			callInstructions = append(callInstructions, instruction)
+			instructions = append(instructions, instruction)
 		}
 	}
-	return callInstructions
+	return instructions
 }
 
 // GetInstructions returns the decompiled opcode instructions.
@@ -256,20 +273,150 @@ func (d *Decompiler) MatchInstruction(instruction Instruction) bool {
 	return false
 }
 
-// NewDecompiler creates a new Decompiler instance with the provided context and bytecode.
-// The bytecode is not automatically decompiled; Decompile() must be called before any
-// information can be retrieved from the decompiler.
+// CountOpCodeOccurrences counts the number of occurrences of a specific opcode in the decompiled instructions.
 // Example:
 //
 //	d := opcodes.NewDecompiler(context.Background(), bytecode)
-//	if err := d.Decompile(); err != nil {
-//	  log.Fatal(err)
+//	d.Decompile()
+//	count := d.CountOpCodeOccurrences(opcodes.PUSH1)
+func (d *Decompiler) CountOpCodeOccurrences(op OpCode) int {
+	count := 0
+	for _, instruction := range d.instructions {
+		if instruction.OpCode == op {
+			count++
+		}
+	}
+	return count
+}
+
+// GetInstructionByOffset retrieves the instruction at a specific offset in the decompiled instructions.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	instruction := d.GetInstructionByOffset(10)
+func (d *Decompiler) GetInstructionByOffset(offset int) (Instruction, error) {
+	for _, instruction := range d.instructions {
+		if instruction.Offset == offset {
+			return instruction, nil
+		}
+	}
+	return Instruction{}, errors.New("instruction not found at offset")
+}
+
+// GetInstructionByIndex retrieves the instruction at a specific index in the decompiled instructions.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	instruction := d.GetInstructionByIndex(0)
+func (d *Decompiler) GetInstructionByIndex(index int) (Instruction, error) {
+	if index < 0 || index >= len(d.instructions) {
+		return Instruction{}, errors.New("invalid instruction index")
+	}
+	return d.instructions[index], nil
+}
+
+// GetInstructionCount returns the total count of instructions in the decompiled instructions.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	count := d.GetInstructionCount()
+func (d *Decompiler) GetInstructionCount() int {
+	return len(d.instructions)
+}
+
+// ClearInstructions clears all the decompiled instructions.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	d.ClearInstructions()
+func (d *Decompiler) ClearInstructions() {
+	d.instructions = []Instruction{}
+}
+
+// GetInstructionByOpCodeAndArguments retrieves instructions that match a specific opcode and arguments.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	instructions := d.GetInstructionByOpCodeAndArguments(opcodes.CALL, []byte{0xab, 0xcd})
+func (d *Decompiler) GetInstructionByOpCodeAndArguments(op OpCode, args []byte) []Instruction {
+	var matchingInstructions []Instruction
+	for _, instruction := range d.instructions {
+		if instruction.OpCode == op && bytes.Equal(instruction.Args, args) {
+			matchingInstructions = append(matchingInstructions, instruction)
+		}
+	}
+	return matchingInstructions
+}
+
+// ReplaceInstruction replaces an instruction at a specific index or offset with a new instruction.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	newInstruction := opcodes.Instruction{
+//		Offset: 10,
+//		OpCode: opcodes.PUSH1,
+//		Args:   []byte{0x01},
 //	}
-func NewDecompiler(ctx context.Context, b []byte) (*Decompiler, error) {
-	return &Decompiler{
-		ctx:          ctx,
-		bytecode:     b,
-		bytecodeSize: uint64(len(b)),
-		instructions: []Instruction{},
-	}, nil
+//	d.ReplaceInstruction(10, newInstruction)
+func (d *Decompiler) ReplaceInstruction(indexOrOffset int, newInstruction Instruction) error {
+	if indexOrOffset < 0 || indexOrOffset >= len(d.instructions) {
+		return errors.New("invalid instruction index or offset")
+	}
+	d.instructions[indexOrOffset] = newInstruction
+	return nil
+}
+
+// InsertInstruction inserts a new instruction at a specific index or offset in the decompiled instructions.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	newInstruction := opcodes.Instruction{
+//		Offset: 10,
+//		OpCode: opcodes.PUSH1,
+//		Args:   []byte{0x01},
+//	}
+//	d.InsertInstruction(10, newInstruction)
+func (d *Decompiler) InsertInstruction(indexOrOffset int, newInstruction Instruction) error {
+	if indexOrOffset < 0 || indexOrOffset > len(d.instructions) {
+		return errors.New("invalid instruction index or offset")
+	}
+	d.instructions = append(d.instructions[:indexOrOffset], append([]Instruction{newInstruction}, d.instructions[indexOrOffset:]...)...)
+	return nil
+}
+
+// RemoveInstruction removes an instruction at a specific index or offset from the decompiled instructions.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	d.RemoveInstruction(10)
+func (d *Decompiler) RemoveInstruction(indexOrOffset int) error {
+	if indexOrOffset < 0 || indexOrOffset >= len(d.instructions) {
+		return errors.New("invalid instruction index or offset")
+	}
+	d.instructions = append(d.instructions[:indexOrOffset], d.instructions[indexOrOffset+1:]...)
+	return nil
+}
+
+// GetJumpDestinations returns a list of jump destinations (JUMPDEST opcodes) in the decompiled instructions.
+// Example:
+//
+//	d := opcodes.NewDecompiler(context.Background(), bytecode)
+//	d.Decompile()
+//	jumpDestinations := d.GetJumpDestinations()
+func (d *Decompiler) GetJumpDestinations() []Instruction {
+	var jumpDestinations []Instruction
+	for _, instruction := range d.instructions {
+		if instruction.OpCode == JUMPDEST {
+			jumpDestinations = append(jumpDestinations, instruction)
+		}
+	}
+	return jumpDestinations
 }

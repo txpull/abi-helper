@@ -30,10 +30,7 @@ type Decompiler struct {
 // It takes a context and a types.Transaction object as input parameters.
 // It returns a pointer to the created Decompiler object and an error.
 func NewDecompiler(ctx context.Context, tx *types.Transaction, s *signatures.SignaturesReader) (*Decompiler, error) {
-	opcode, err := opcodes.NewDecompiler(ctx, tx.Data())
-	if err != nil {
-		return nil, err
-	}
+	opcode := opcodes.NewDecompiler(ctx, tx.Data())
 
 	return &Decompiler{
 		ctx:        ctx,

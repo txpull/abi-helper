@@ -93,6 +93,27 @@ func (d *Decompiler) GetInstructionTreeFormatted(instruction Instruction, indent
 	return builder.String()
 }
 
+// GetInstructionTree returns a tree structure containing all instructions related to the initial instruction.
+func (d *Decompiler) GetInstructionTree(initial Instruction) *TreeNode {
+	root := &TreeNode{Instruction: initial}
+	visited := make(map[int]bool)
+	visited[initial.Offset] = true
+
+	d.buildInstructionTreeA(root, visited)
+	return root
+}
+
+func (d *Decompiler) buildInstructionTreeA(parent *TreeNode, visited map[int]bool) {
+	for _, instr := range d.instructions {
+		if instr.Offset == parent.Instruction.Offset {
+			child := &TreeNode{Instruction: instr}
+			parent.Children = append(parent.Children, child)
+			visited[instr.Offset] = true
+			d.buildInstructionTreeA(child, visited)
+		}
+	}
+}
+
 // GetChildrenByOffset returns the child instructions of a given offset.
 // These are the instructions that directly follow the instruction at the given offset.
 // If no such instructions exist, it returns an empty slice.

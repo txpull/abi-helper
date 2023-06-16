@@ -63,7 +63,7 @@ var fourbyteCmd = &cobra.Command{
 			scanners.WithContext(cmd.Context()),
 		)
 
-		crawler := fourbyte.NewFourByteWritter(
+		crawler := fourbyte.NewFourByteWriter(
 			fourbyte.WithContext(cmd.Context()),
 			fourbyte.WithProvider(provider),
 			fourbyte.WithDB(bdb),

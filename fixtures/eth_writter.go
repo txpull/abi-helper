@@ -14,8 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// EthGeneratorConfig holds the configuration for EthGenerator.
-type EthGeneratorConfig struct {
+// EthWriterConfig holds the configuration for EthWriter.
+type EthWriterConfig struct {
 	ClientURL               string // URL of the Ethereum client.
 	ConcurrentClientsNumber uint16 // Number of concurrent Ethereum clients.
 	StartBlockNumber        uint64 // Starting block number for generating fixtures.
@@ -23,10 +23,10 @@ type EthGeneratorConfig struct {
 	FixtureDataPath         string // Path to the directory where fixtures will be stored.
 }
 
-// EthGenerator is responsible for generating Ethereum fixtures.
-type EthGenerator struct {
+// EthWriter is responsible for generating Ethereum fixtures.
+type EthWriter struct {
 	ctx          context.Context
-	config       EthGeneratorConfig
+	config       EthWriterConfig
 	clients      *clients.EthClient
 	blocks       [][]byte
 	transactions map[common.Hash][]byte
@@ -36,7 +36,7 @@ type EthGenerator struct {
 // Generate generates the Ethereum fixtures.
 // It retrieves blocks from the blockchain within the specified range and encodes them into RLP format.
 // Transactions and receipts associated with the blocks are also encoded and stored.
-func (e *EthGenerator) Generate() error {
+func (e *EthWriter) Generate() error {
 	// Clean up previously generated data
 	e.blocks = [][]byte{}
 	e.transactions = make(map[common.Hash][]byte)
@@ -110,7 +110,7 @@ func (e *EthGenerator) Generate() error {
 }
 
 // Write writes the generated fixtures to files.
-func (e *EthGenerator) Write() error {
+func (e *EthWriter) Write() error {
 	blocksPath := filepath.Join(e.config.FixtureDataPath, "blocks.gob")
 	if err := removeFileIfExists(blocksPath); err != nil {
 		return err
@@ -165,9 +165,9 @@ func removeFileIfExists(path string) error {
 	return nil
 }
 
-// NewEthGenerator creates a new instance of EthGenerator.
-func NewEthGenerator(ctx context.Context, config EthGeneratorConfig) (*EthGenerator, error) {
-	generator := &EthGenerator{
+// NewEthWriter creates a new instance of EthWriter.
+func NewEthWriter(ctx context.Context, config EthWriterConfig) (*EthWriter, error) {
+	generator := &EthWriter{
 		ctx:          ctx,
 		config:       config,
 		transactions: make(map[common.Hash][]byte),

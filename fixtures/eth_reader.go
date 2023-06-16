@@ -42,6 +42,18 @@ func (e *EthReader) GetBlocks() map[common.Hash]*types.Block {
 	return e.blocks
 }
 
+func (e *EthReader) GetBlocksWithLimit(limit int) map[common.Hash]*types.Block {
+	toReturn := map[common.Hash]*types.Block{}
+	for _, block := range e.blocks {
+		if len(toReturn) == limit {
+			return toReturn
+		}
+		toReturn[block.Hash()] = block
+	}
+
+	return toReturn
+}
+
 // GetTransactions returns the map of transactions stored in the EthReader.
 func (e *EthReader) GetTransactions() map[common.Hash]*types.Transaction {
 	return e.transactions
@@ -50,6 +62,16 @@ func (e *EthReader) GetTransactions() map[common.Hash]*types.Transaction {
 // GetReceipts returns the map of receipts stored in the EthReader.
 func (e *EthReader) GetReceipts() map[common.Hash]*types.Receipt {
 	return e.receipts
+}
+
+func (e *EthReader) GetBlockByNumber(blockNumber uint64) (*types.Block, bool) {
+	for _, block := range e.blocks {
+		if block.NumberU64() == blockNumber {
+			return block, true
+		}
+	}
+
+	return nil, false
 }
 
 // GetReceiptFromTxHash retrieves the receipt associated with the given transaction hash from the EthReader.

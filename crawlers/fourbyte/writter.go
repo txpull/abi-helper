@@ -19,50 +19,50 @@ import (
 // BDB_NAME_LAST_PROCESSED_PAGE_KEY is the key for the last processed page number in BadgerDB.
 const BDB_NAME_LAST_PROCESSED_PAGE_KEY = "last_processed_fourbyte_page_num"
 
-// FourByteWritter provides a crawler which processes pages and saves signatures to a BadgerDB.
-type FourByteWritter struct {
+// FourByteWriter provides a crawler which processes pages and saves signatures to a BadgerDB.
+type FourByteWriter struct {
 	ctx      context.Context            // Context to control the crawling process.
 	provider *scanners.FourByteProvider // Provider used to fetch pages.
 	db       *db.BadgerDB               // BadgerDB instance for storing signatures.
 	cooldown time.Duration              // Cooldown duration between page fetches.
 }
 
-// WritterOption is a functional option for customizing the FourByteWritter.
-type WritterOption func(*FourByteWritter)
+// WriterOption is a functional option for customizing the FourByteWriter.
+type WriterOption func(*FourByteWriter)
 
-// WithProvider sets the FourByteProvider for the FourByteWritter.
+// WithProvider sets the FourByteProvider for the FourByteWriter.
 //
 // Example:
 //
 //		provider := scanners.NewFourByteProvider(httpClient)
-//	 crawler := NewFourByteWritter(WithProvider(provider))
-func WithProvider(provider *scanners.FourByteProvider) WritterOption {
-	return func(c *FourByteWritter) {
+//	 crawler := NewFourByteWriter(WithProvider(provider))
+func WithProvider(provider *scanners.FourByteProvider) WriterOption {
+	return func(c *FourByteWriter) {
 		c.provider = provider
 	}
 }
 
-// WithDB sets the BadgerDB for the FourByteWritter.
+// WithDB sets the BadgerDB for the FourByteWriter.
 //
 // Example:
 //
 //	db, _ := db.NewBadgerDB(db.WithContext(ctx), db.WithDbPath("/tmp/mydb"))
-//	crawler := NewFourByteWritter(WithDB(db))
-func WithDB(db *db.BadgerDB) WritterOption {
-	return func(c *FourByteWritter) {
+//	crawler := NewFourByteWriter(WithDB(db))
+func WithDB(db *db.BadgerDB) WriterOption {
+	return func(c *FourByteWriter) {
 		c.db = db
 	}
 }
 
-// WithContext sets the context for the FourByteWritter.
+// WithContext sets the context for the FourByteWriter.
 //
 // Example:
 //
 //	ctx, cancel := context.WithCancel(context.Background())
-//	crawler := NewFourByteWritter(WithContext(ctx))
+//	crawler := NewFourByteWriter(WithContext(ctx))
 //	defer cancel()
-func WithContext(ctx context.Context) WritterOption {
-	return func(c *FourByteWritter) {
+func WithContext(ctx context.Context) WriterOption {
+	return func(c *FourByteWriter) {
 		c.ctx = ctx
 	}
 }
@@ -71,16 +71,16 @@ func WithContext(ctx context.Context) WritterOption {
 //
 // Example:
 //
-//	crawler := NewFourByteWritter(WithCooldown(1 * time.Second))
-func WithCooldown(cooldown time.Duration) WritterOption {
-	return func(c *FourByteWritter) {
+//	crawler := NewFourByteWriter(WithCooldown(1 * time.Second))
+func WithCooldown(cooldown time.Duration) WriterOption {
+	return func(c *FourByteWriter) {
 		c.cooldown = cooldown
 	}
 }
 
-// NewFourByteWritter creates a new FourByteWritter instance with the provided options.
+// NewFourByteWriter creates a new FourByteWriter instance with the provided options.
 //
-// By default, FourByteWritter uses a background context and a cooldown period of 200ms.
+// By default, FourByteWriter uses a background context and a cooldown period of 200ms.
 // Options can be provided to change these defaults or to set the FourByteProvider and the BadgerDB instance.
 //
 // Example:
@@ -91,14 +91,14 @@ func WithCooldown(cooldown time.Duration) WritterOption {
 //	db, _ := db.NewBadgerDB(db.WithContext(ctx), db.WithDbPath("/tmp/mydb"))
 //	provider := scanners.NewFourByteProvider(httpClient)
 //
-//	writter := NewFourByteWritter(
+//	writer := NewFourByteWriter(
 //		WithContext(ctx),
 //		WithDB(db),
 //		WithProvider(provider),
 //		WithCooldown(1 * time.Second),
 //	)
-func NewFourByteWritter(opts ...WritterOption) *FourByteWritter {
-	writter := &FourByteWritter{
+func NewFourByteWriter(opts ...WriterOption) *FourByteWriter {
+	writer := &FourByteWriter{
 		ctx:      context.Background(),
 		provider: nil,
 		db:       nil,
@@ -106,9 +106,9 @@ func NewFourByteWritter(opts ...WritterOption) *FourByteWritter {
 	}
 
 	for _, opt := range opts {
-		opt(writter)
+		opt(writer)
 	}
-	return writter
+	return writer
 }
 
 // Crawl starts crawling and processing pages.
@@ -130,7 +130,7 @@ func NewFourByteWritter(opts ...WritterOption) *FourByteWritter {
 //	if err != nil {
 //		log.Fatal("Failed to crawl pages", zap.Error(err))
 //	}
-func (w *FourByteWritter) Crawl() error {
+func (w *FourByteWriter) Crawl() error {
 	// Get the last page number from the BadgerDB.
 	pageNum, err := w.getLastPageNum()
 	if err != nil {
@@ -203,7 +203,7 @@ func (w *FourByteWritter) Crawl() error {
 // The getLastPageNum method retrieves the last processed page number from the BadgerDB instance.
 // It opens a transaction to access the value associated with the BDB_NAME_LAST_PROCESSED_PAGE_KEY key.
 // If the key is not found, it returns 0 as the last page number.
-func (w *FourByteWritter) getLastPageNum() (uint64, error) {
+func (w *FourByteWriter) getLastPageNum() (uint64, error) {
 	pageNum := uint64(1)
 	exists, err := w.db.Exists(BDB_NAME_LAST_PROCESSED_PAGE_KEY)
 	if err != nil {
@@ -225,7 +225,7 @@ func (w *FourByteWritter) getLastPageNum() (uint64, error) {
 //
 // The setLastPageNum method sets the last processed page number in the BadgerDB instance.
 // It opens a transaction and stores the provided page number as a byte slice using the BDB_NAME_LAST_PROCESSED_PAGE_KEY key.
-func (w *FourByteWritter) setLastPageNum(pageNum uint64) error {
+func (w *FourByteWriter) setLastPageNum(pageNum uint64) error {
 	val := make([]byte, 8)
 	binary.BigEndian.PutUint64(val, pageNum)
 	return w.db.Write(BDB_NAME_LAST_PROCESSED_PAGE_KEY, val)
@@ -235,7 +235,7 @@ func (w *FourByteWritter) setLastPageNum(pageNum uint64) error {
 //
 // The saveSignatureIfNotExists method checks if the signature already exists in the database.
 // If it doesn't exist, it saves the signature to the database using the saveSignature method.
-func (w *FourByteWritter) saveSignatureIfNotExists(signature *signatures.Signature) error {
+func (w *FourByteWriter) saveSignatureIfNotExists(signature *signatures.Signature) error {
 	// Check if the signature already exists in the database.
 	exists, err := w.signatureExists(signature)
 	if err != nil {
@@ -257,7 +257,7 @@ func (w *FourByteWritter) saveSignatureIfNotExists(signature *signatures.Signatu
 // The signatureExists method checks if the given signature exists in the database.
 // It opens a transaction and attempts to retrieve the value associated with the signature's hex string.
 // If the key is not found, it returns false, indicating that the signature does not exist.
-func (w *FourByteWritter) signatureExists(signature *signatures.Signature) (bool, error) {
+func (w *FourByteWriter) signatureExists(signature *signatures.Signature) (bool, error) {
 	exists, err := w.db.Exists(signature.Hex)
 	if err != nil {
 		return false, err
@@ -271,7 +271,7 @@ func (w *FourByteWritter) signatureExists(signature *signatures.Signature) (bool
 // The saveSignature method saves the given signature to the database.
 // It opens a transaction, marshals the signature to JSON bytes, and stores the byte slice using the signature's hex string as the key.
 // saveSignature saves the signature to the database.
-func (w *FourByteWritter) saveSignature(signature *signatures.Signature) error {
+func (w *FourByteWriter) saveSignature(signature *signatures.Signature) error {
 	signatureBytes, err := signature.MarshalBytes()
 	if err != nil {
 		return err

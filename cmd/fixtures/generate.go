@@ -53,7 +53,7 @@ var generateEthCmd = &cobra.Command{
 			zap.String("fixtures-output-path", fixturesPath),
 		)
 
-		config := fixtures.EthWritterConfig{
+		config := fixtures.EthWriterConfig{
 			ClientURL:               viper.GetString("eth.node.url"),
 			ConcurrentClientsNumber: viper.GetUint16("eth.node.concurrent_clients_number"),
 			StartBlockNumber:        viper.GetUint64("eth.generator.start_block_number"),
@@ -61,18 +61,18 @@ var generateEthCmd = &cobra.Command{
 			FixtureDataPath:         fixturesPath,
 		}
 
-		writter, err := fixtures.NewEthWritter(cmd.Context(), config)
+		writer, err := fixtures.NewEthWriter(cmd.Context(), config)
 		if err != nil {
 			return err
 		}
 
 		// Generate all of the data. Basically, fetch data from the blockchain itself
-		if err := writter.Generate(); err != nil {
+		if err := writer.Generate(); err != nil {
 			return err
 		}
 
 		// Will remove existing files in fixture data path and replace files with new content
-		if err := writter.Write(); err != nil {
+		if err := writer.Write(); err != nil {
 			return err
 		}
 

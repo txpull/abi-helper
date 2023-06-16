@@ -33,9 +33,9 @@ type CsvContract struct {
 	ContractName    string
 }
 
-// BscscanWritter encapsulates the context, scanner, data paths, rate-limiting mechanism,
+// BscscanWriter encapsulates the context, scanner, data paths, rate-limiting mechanism,
 // and concurrency controls needed to interact with the BscScan API.
-type BscscanWritter struct {
+type BscscanWriter struct {
 	ctx            context.Context
 	scanner        *scanners.BscScanProvider
 	dataPath       string
@@ -52,8 +52,8 @@ type BscscanWritter struct {
 //	ctx := context.Background()
 //	scanner := scanners.NewBscScanProvider("your-api-key")
 //	bs := bscscan.New(ctx, scanner, "path/to/data.csv", "path/to/output.gob")
-func New(ctx context.Context, scanner *scanners.BscScanProvider, dataPath string, outputDataFile string) *BscscanWritter {
-	return &BscscanWritter{ctx: ctx, scanner: scanner, dataPath: dataPath, outputDataFile: outputDataFile}
+func New(ctx context.Context, scanner *scanners.BscScanProvider, dataPath string, outputDataFile string) *BscscanWriter {
+	return &BscscanWriter{ctx: ctx, scanner: scanner, dataPath: dataPath, outputDataFile: outputDataFile}
 }
 
 // GatherVerifiedContracts reads contract data from a CSV file.
@@ -65,7 +65,7 @@ func New(ctx context.Context, scanner *scanners.BscScanProvider, dataPath string
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-func (bs *BscscanWritter) GatherVerifiedContracts() ([]CsvContract, error) {
+func (bs *BscscanWriter) GatherVerifiedContracts() ([]CsvContract, error) {
 	file, err := os.Open(bs.dataPath)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func (bs *BscscanWritter) GatherVerifiedContracts() ([]CsvContract, error) {
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
-func (bs *BscscanWritter) ProcessVerifiedContracts(contracts []CsvContract) error {
+func (bs *BscscanWriter) ProcessVerifiedContracts(contracts []CsvContract) error {
 	if len(contracts) < 1 {
 		return errors.New("no contracts to process")
 	}

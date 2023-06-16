@@ -22,13 +22,14 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	fixtures_cmd "github.com/txpull/bytecode/cmd/fixtures"
 	syncers_cmd "github.com/txpull/bytecode/cmd/syncers"
+	"github.com/txpull/bytecode/utils"
+	"go.uber.org/zap"
 )
 
 var cfgFile string
@@ -52,26 +53,12 @@ func SetVersion(v string) {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".txbyte" (with .yaml extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".txbyte")
+	if err := utils.InitConfig(cfgFile); err != nil {
+		zap.L().Error("failed to initialize configuration", zap.Error(err))
+		os.Exit(1)
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
+	zap.L().Info("Using configuration file", zap.String("path", viper.ConfigFileUsed()))
 }
 
 func init() {

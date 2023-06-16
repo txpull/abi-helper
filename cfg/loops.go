@@ -52,8 +52,14 @@ func (cfg *CFG) detectLoop(node *Node, visited map[*Node]bool) {
 func (cfg *CFG) dfs(node *Node, visited map[*Node]bool, loopBounds []int, loopInvariants []string, depth int, exitNode **Node) bool {
 	visited[node] = true
 
+	// Ensure node.Offset is within the valid range of indices
+	if node.Offset >= len(cfg.instructions) {
+		return visited[node]
+	}
+
 	// Determine loop characteristics (e.g., loop bounds, loop invariants)
 	instructions := cfg.instructions[node.Offset : node.Offset+1]
+
 	for _, instruction := range instructions {
 		// Extract loop bounds and invariants based on specific conditions or patterns in the bytecode
 		if instruction.OpCode == opcodes.JUMP {

@@ -1,11 +1,24 @@
+# Configuration for the Ethereum or BSC blockchain
 eth:
+  # Configuration for the Ethereum node
   node:
+    # URL of the Ethereum node to connect to
     url: "xxx"
+    # Number of concurrent clients that can make requests to the Ethereum node
     concurrent_clients_number: 3
+
+  # Configuration for the contract generator
   generator:
+    # Block number to start generating contracts from
     start_block_number: 28977150
+    # Block number to end generating contracts at
     end_block_number: 28978170
+
+# Configuration for the BscScan API
 bscscan:
+  # Configuration for the BscScan API
   api:
+    # Base URL for the BscScan API
     url: "https://api.bscscan.com/api"
+    # API key for the BscScan API
     key: "xxx"

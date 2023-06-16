@@ -53,8 +53,8 @@ func main() {
 	}
 
 	client, err := clients.NewEthClients(
-		viper.GetString("eth.node.url"),
-		viper.GetUint16("eth.node.concurrent_clients_number"),
+		viper.GetString("eth.archive_node.url"),
+		viper.GetUint16("eth.archive_node.concurrent_clients_number"),
 	)
 	if err != nil {
 		logger.Error("failed to initialize eth client", zap.Error(err))

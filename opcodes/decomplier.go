@@ -140,6 +140,14 @@ func (d *Decompiler) OpCodeFound(op OpCode) bool {
 	return false
 }
 
+func (d *Decompiler) GetOpCodesAsString() []string {
+	var opCodes []string
+	for _, instruction := range d.instructions {
+		opCodes = append(opCodes, instruction.OpCode.String())
+	}
+	return opCodes
+}
+
 // IsSelfDestruct checks if the decompiled instructions contain the SELFDESTRUCT opcode.
 func (d *Decompiler) IsSelfDestruct() bool {
 	return d.OpCodeFound(SELFDESTRUCT)

@@ -9,6 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/txpull/bytecode/clients"
 	"github.com/txpull/bytecode/db"
+	"github.com/txpull/bytecode/opcodes"
+	"go.uber.org/zap"
 )
 
 // ContractDecoder is a structure that holds a context, a BadgerDB instance and an EthClient instance.
@@ -93,6 +95,62 @@ func NewContractDecoder(opts ...Option) *ContractDecoder {
 	return reader
 }
 
-func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *types.Transaction, receipt *types.Receipt, contractAddress common.Address) (*struct{}, error) {
-	return nil, nil
+// ProcessContractCreationTx is a method that processes an Ethereum contract creation transaction,
+// decomposes it into bytecodes, and returns a ContractCreationTxResult structure.
+// If the passed block, transaction or receipt is nil, it returns an error.
+// If it fails to decompile the transaction data or to fetch the contract bytecode, it logs the error and returns it.
+// If the transaction data and the contract bytecode are successfully decomposed, it returns a ContractCreationTxResult
+// structure that contains these bytecodes along with other information from the transaction.
+func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *types.Transaction, receipt *types.Receipt, contractAddress common.Address) (*ContractCreationTxResult, error) {
+	// We need block at this stage to process contract creation transaction :lol:
+	if tx == nil {
+		return nil, ErrMissingBlock
+	}
+
+	// We really need transaction at this stage to process contract creation transaction :lol:
+	if tx == nil {
+		return nil, ErrMissingTransaction
+	}
+
+	// We need receipt at this stage to process contract creation transaction :lol:
+	if tx == nil {
+		return nil, ErrMissingReceipt
+	}
+
+	runtimeDecompiler, err := opcodes.NewDecompiler(c.ctx, tx.Data())
+	if err != nil {
+		zap.L().Error("failed to create transaction decompiler", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
+		return nil, err
+	}
+
+	if err := runtimeDecompiler.Decompile(); err != nil {
+		zap.L().Error("failed to decompile transaction", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
+		return nil, err
+	}
+
+	// Get the bytecode from the transaction
+	bytecode, err := c.ethClient.GetClient().CodeAt(c.ctx, contractAddress, block.Number())
+	if err != nil {
+		zap.L().Error("failed to get contract bytecode", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
+		return nil, err
+	}
+
+	decompiler, err := opcodes.NewDecompiler(c.ctx, bytecode)
+	if err != nil {
+		zap.L().Error("failed to create transaction decompiler", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
+		return nil, err
+	}
+
+	return &ContractCreationTxResult{
+		BlockNumber:         block.Number(),
+		TransactionHash:     tx.Hash(),
+		ReceiptStatus:       receipt.Status,
+		ContractAddress:     contractAddress,
+		RuntimeBytecode:     runtimeDecompiler.GetBytecode(),
+		RuntimeBytecodeSize: runtimeDecompiler.GetBytecodeSize(),
+		RuntimeOpCodes:      runtimeDecompiler,
+		Bytecode:            decompiler.GetBytecode(),
+		BytecodeSize:        decompiler.GetBytecodeSize(),
+		OpCodes:             decompiler,
+	}, nil
 }

@@ -45,7 +45,7 @@ var fourbyteCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			databasePath = path.Join(currentDir, "data", "signatures")
+			databasePath = path.Join(currentDir, "data", "db")
 		}
 
 		// Open the Badger database located in the databasePath directory.

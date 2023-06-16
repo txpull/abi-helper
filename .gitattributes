@@ -1,4 +1,4 @@
 *.gob filter=lfs diff=lfs merge=lfs -text
 *.db filter=lfs diff=lfs merge=lfs -text
 *.csv filter=lfs diff=lfs merge=lfs -text
-data/signatures/* filter=lfs diff=lfs merge=lfs -text
+data/db/* filter=lfs diff=lfs merge=lfs -text

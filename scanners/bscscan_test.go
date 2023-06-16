@@ -81,7 +81,6 @@ func TestBscScanProvider_ScanContract(t *testing.T) {
 				if err != nil {
 					t.Errorf("unexpected error: %s", err)
 				}
-				t.Logf("Got result: %+v - addr: %s", result, tc.contractAddress)
 
 				if result.Name != tc.expectedName {
 					t.Errorf("unexpected contract name; got %s, want %s", result.Name, tc.expectedName)

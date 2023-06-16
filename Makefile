@@ -1,8 +1,11 @@
 .DEFAULT_GOAL := help
 
-BIN_NAME := build/abihelper
-PKG := abihelper
+BIN_NAME := build/txbyte
+PKG := bytecode
 VERSION := 1.0.0
+UNAME_S := $(shell uname -s 2>/dev/null || echo "unknown")
+UNAME_S_LOWERCASE := $(shell echo $(UNAME_S) | tr A-Z a-z)
+BUILD_TARGET := build-$(UNAME_S_LOWERCASE)
 
 .PHONY: help
 help: ## Display this help
@@ -10,16 +13,14 @@ help: ## Display this help
 
 .PHONY: deps
 deps: ## Install dependencies
-ifeq ($(OS),Windows_NT) # Windows
+ifeq ($(UNAME_S),Linux)
+	sudo apt-get update && sudo apt-get install -y golang sqlite3 golangci-lint redis-server
+endif
+ifeq ($(UNAME_S),Darwin)
+	brew install go sqlite golangci-lint redis
+endif
+ifeq ($(OS),Windows_NT)
 	choco install golang sqlite golangci-lint redis
-else
-	UNAME_S := $(shell uname -s 2>/dev/null || echo "unknown")
-	ifeq ($(UNAME_S),Linux) # Linux
-		sudo apt-get update && sudo apt-get install -y golang sqlite3 golangci-lint redis-server
-	endif
-	ifeq ($(UNAME_S),Darwin) # macOS
-		brew install go sqlite golangci-lint redis
-	endif
 endif
 
 .PHONY: lint
@@ -27,25 +28,14 @@ lint: ## Lint the Go code using golangci-lint
 	golangci-lint run
 
 .PHONY: build
-build: ## Build the binary for the current OS/Arch
-ifeq ($(OS),Windows_NT) # Windows
-	@make build-windows
-else
-	UNAME_S := $(shell uname -s 2>/dev/null || echo "unknown")
-	ifeq ($(UNAME_S),Linux) # Linux
-		@make build-linux
-	endif
-	ifeq ($(UNAME_S),Darwin) # macOS
-		@make build-macos
-	endif
-endif
+build: $(BUILD_TARGET) ## Build the binary for the current OS/Arch
 
 .PHONY: build-linux
 build-linux: ## Build the binary for Linux
 	GOOS=linux GOARCH=amd64 go build -o ./$(BIN_NAME) -ldflags "-X main.Version=$(VERSION)" .
 
-.PHONY: build-macos
-build-macos: ## Build the binary for MacOS
+.PHONY: build-darwin
+build-darwin: ## Build the binary for MacOS
 	GOOS=darwin GOARCH=amd64 go build -o ./$(BIN_NAME) -ldflags "-X main.Version=$(VERSION)" .
 
 .PHONY: build-windows

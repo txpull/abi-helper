@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/txpull/bytecode/abi"
+	"github.com/txpull/bytecode/cfg"
 	"github.com/txpull/bytecode/opcodes"
 	"github.com/txpull/bytecode/signatures"
 	"github.com/txpull/bytecode/solidity"
@@ -45,6 +46,9 @@ type ContractCreationTxResult struct {
 
 	// OpCodes represents the decompiled version of the contract bytecode.
 	OpCodes *opcodes.Decompiler `json:"-"`
+
+	// ControlFlowGraph represents the control flow graph of the contract.
+	ControlFlowGraph *cfg.CFG `json:"-"`
 
 	// ABI represents the decoded contract ABI.
 	ABI *abi.Decoder `json:"-"`

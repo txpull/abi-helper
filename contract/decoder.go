@@ -4,9 +4,11 @@ package contract
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/txpull/bytecode/cfg"
 	"github.com/txpull/bytecode/clients"
 	"github.com/txpull/bytecode/db"
 	"github.com/txpull/bytecode/opcodes"
@@ -131,9 +133,7 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		return nil, err
 	}
 
-	decompiler := opcodes.NewDecompiler(c.ctx, bytecode)
-
-	return &ContractCreationTxResult{
+	toReturn := &ContractCreationTxResult{
 		BlockNumber:         block.Number(),
 		TransactionHash:     tx.Hash(),
 		ReceiptStatus:       receipt.Status,
@@ -141,8 +141,42 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		RuntimeBytecode:     runtimeDecompiler.GetBytecode(),
 		RuntimeBytecodeSize: runtimeDecompiler.GetBytecodeSize(),
 		RuntimeOpCodes:      runtimeDecompiler,
-		Bytecode:            decompiler.GetBytecode(),
-		BytecodeSize:        decompiler.GetBytecodeSize(),
-		OpCodes:             decompiler,
-	}, nil
+	}
+
+	decompiler := opcodes.NewDecompiler(c.ctx, bytecode)
+	if len(bytecode) > 0 {
+		if err := decompiler.Decompile(); err != nil {
+			zap.L().Error("failed to decompile contract bytecode", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
+			return nil, err
+		}
+
+		toReturn.Bytecode = decompiler.GetBytecode()
+		toReturn.BytecodeSize = decompiler.GetBytecodeSize()
+		toReturn.OpCodes = decompiler
+
+		fmt.Println(common.Bytes2Hex(decompiler.GetBytecode()))
+
+		graph, err := cfg.NewCFG(bytecode)
+		if err != nil {
+			zap.L().Error("failed to create control flow graph", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
+			return nil, err
+		}
+
+		toReturn.ControlFlowGraph = graph
+
+		// Perform path analysis and obtain the paths
+		paths := graph.FindAllPaths()
+
+		// Access the paths
+		fmt.Println("Number of paths:", len(paths))
+		for i, path := range paths {
+			fmt.Printf("Path %d: ", i+1)
+			for _, node := range path {
+				fmt.Printf("%d -> ", node.Offset)
+			}
+			fmt.Println("Exit")
+		}
+	}
+
+	return toReturn, nil
 }

@@ -128,11 +128,20 @@ func main() {
 					continue
 				}
 
+				_ = result
+
+				// We can use this to determine if the contract is a proxy contract or not.
+				// If it is a proxy contract, we can use the proxy contract reader to process it.
+				// If it is not a proxy contract, we can use the regular contract reader to process it.
+				// We can also use this to determine if the contract is a contract factory or not.
+				// If it is a contract factory, we can use the contract factory reader to process it.
+				// If it is not a contract factory, we can use the regular contract reader to process it.
+
 				zap.L().Info(
 					"Contract processed successfully",
 					zap.Int64("block_number", block.Number().Int64()),
 					zap.String("tx_hash", tx.Hash().Hex()),
-					zap.Reflect("result", result),
+					//zap.Reflect("result", result),
 				)
 
 			}

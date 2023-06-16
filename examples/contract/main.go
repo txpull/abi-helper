@@ -92,7 +92,7 @@ func main() {
 
 	// END INITIALIZATION OF THE PREREQUISITES
 
-	contract := contract.NewContract(
+	decoder := contract.NewContractDecoder(
 		contract.WithContext(ctx),
 		contract.WithEthClient(client),
 		contract.WithDB(bdb),
@@ -117,7 +117,7 @@ func main() {
 				)
 
 				// We have a contract creation transaction. Let's process it.
-				result, err := contract.ProcessContractCreationTx(
+				result, err := decoder.ProcessContractCreationTx(
 					block,
 					tx,
 					receipt,

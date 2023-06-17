@@ -153,7 +153,7 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		toReturn.BytecodeSize = decompiler.GetBytecodeSize()
 		toReturn.OpCodes = decompiler
 
-		graph, err := controlflow.NewDecoder(bytecode)
+		graph, err := controlflow.NewDecoder(decompiler)
 		if err != nil {
 			zap.L().Error("failed to create control flow graph", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
 			return nil, err

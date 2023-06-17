@@ -17,7 +17,7 @@ type Loop struct {
 }
 
 // DetectLoops detects loops in the Control Flow Graph.
-func (cfg *CfgDecoder) DetectLoops() {
+func (cfg *Decoder) DetectLoops() {
 	visited := make(map[*Node]bool)
 	for _, node := range cfg.nodes {
 		if visited[node] {
@@ -28,7 +28,7 @@ func (cfg *CfgDecoder) DetectLoops() {
 }
 
 // detectLoop detects a loop starting from the given node in the Control Flow Graph.
-func (cfg *CfgDecoder) detectLoop(node *Node, visited map[*Node]bool) {
+func (cfg *Decoder) detectLoop(node *Node, visited map[*Node]bool) {
 	loopBounds := make([]int, 0)
 	loopInvariants := make([]string, 0)
 	exitNode := node
@@ -53,7 +53,7 @@ func (cfg *CfgDecoder) detectLoop(node *Node, visited map[*Node]bool) {
 }
 
 // depthLimitedDFS performs a depth-limited depth-first search to detect loops in the Control Flow Graph.
-func (cfg *CfgDecoder) depthLimitedDFS(node *Node, visited map[*Node]bool, loopBounds []int, loopInvariants []string, depth int, exitNode **Node) bool {
+func (cfg *Decoder) depthLimitedDFS(node *Node, visited map[*Node]bool, loopBounds []int, loopInvariants []string, depth int, exitNode **Node) bool {
 	visited[node] = true
 
 	// Ensure node.Offset is within the valid range of indices

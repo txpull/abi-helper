@@ -4,7 +4,7 @@ type Block struct {
 	Nodes []*Node
 }
 
-func (cfg *CfgDecoder) createBlocks() {
+func (cfg *Decoder) createBlocks() {
 	block := &Block{}
 
 	for _, node := range cfg.nodes {

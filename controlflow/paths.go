@@ -1,6 +1,6 @@
 package controlflow
 
-func (cfg *CfgDecoder) FindAllPaths() [][]*Node {
+func (cfg *Decoder) FindAllPaths() [][]*Node {
 	paths := make([][]*Node, 0)
 	visited := make(map[*Node]bool)
 
@@ -9,7 +9,7 @@ func (cfg *CfgDecoder) FindAllPaths() [][]*Node {
 	return paths
 }
 
-func (cfg *CfgDecoder) dfsWithLoopDetection(node *Node, loopPath []*Node, visited map[*Node]bool, paths *[][]*Node) {
+func (cfg *Decoder) dfsWithLoopDetection(node *Node, loopPath []*Node, visited map[*Node]bool, paths *[][]*Node) {
 	if visited[node] {
 		return
 	}
@@ -47,7 +47,7 @@ func (cfg *CfgDecoder) dfsWithLoopDetection(node *Node, loopPath []*Node, visite
 	delete(visited, node)
 }
 
-func (cfg *CfgDecoder) isLoopHeader(node *Node) bool {
+func (cfg *Decoder) isLoopHeader(node *Node) bool {
 	for _, loop := range cfg.loops {
 		if loop.Header == node {
 			return true
@@ -56,7 +56,7 @@ func (cfg *CfgDecoder) isLoopHeader(node *Node) bool {
 	return false
 }
 
-func (cfg *CfgDecoder) findLoopByHeader(header *Node) *Loop {
+func (cfg *Decoder) findLoopByHeader(header *Node) *Loop {
 	for _, loop := range cfg.loops {
 		if loop.Header == header {
 			return loop

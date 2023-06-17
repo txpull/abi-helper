@@ -48,7 +48,7 @@ type ContractCreationTxResult struct {
 	OpCodes *opcodes.Decompiler `json:"-"`
 
 	// ControlFlowGraph represents the control flow graph of the contract.
-	ControlFlowGraph *controlflow.CfgDecoder `json:"-"`
+	ControlFlowGraph *controlflow.Decoder `json:"-"`
 
 	// ABI represents the decoded contract ABI.
 	ABI *abi.Decoder `json:"-"`

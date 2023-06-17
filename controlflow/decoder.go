@@ -1,34 +1,10 @@
 /*
-Package cfg provides functionality for creating and analyzing Control Flow Graphs (CFGs) for Ethereum smart contracts.
-
+Package controlflow provides functionality for creating and analyzing Control Flow Graphs (CFGs) for Ethereum smart contracts.
 Control Flow Graphs represent the flow of execution within a program by modeling the relationships between different instructions or blocks of code.
-
 The CFG struct represents a Control Flow Graph and contains information about its nodes, blocks, entry point, exit point, instructions, and loops.
-
 The Node struct represents a node in the Control Flow Graph and contains information about its offset, next node, branch node, function node, dominators, and post-dominators.
-
-Example usage:
-
-	cfg, err := NewCFG(bytecode)
-	if err != nil {
-		// Handle error
-	}
-
-	cfg.Detect()
-
-	cfg.Print() // Print the Control Flow Graph
-
-	cfg.PerformDominatorAnalysis() // Perform dominator analysis on the CFG
-
-	cfg.RemoveDeadCode() // Remove dead code from the CFG
-
-	cfg.Print() // Print the updated Control Flow Graph
-
-	cfg.Reverse() // Reverse the Control Flow Graph
-
-	cfg.Print() // Print the reversed Control Flow Graph
 */
-package cfg
+package controlflow
 
 import (
 	"context"
@@ -39,7 +15,7 @@ import (
 )
 
 // CFG represents a Control Flow Graph.
-type CFG struct {
+type CfgDecoder struct {
 	nodes        map[int]*Node         // Nodes in the CFG
 	blocks       []*Block              // Blocks in the CFG
 	entry        *Node                 // Entry node of the CFG
@@ -59,7 +35,7 @@ type Node struct {
 }
 
 // NewCFG creates a new Control Flow Graph from the given bytecode.
-func NewCFG(bytecode []byte) (*CFG, error) {
+func NewDecoder(bytecode []byte) (*CfgDecoder, error) {
 	decompiler := opcodes.NewDecompiler(context.Background(), bytecode)
 	if err := decompiler.Decompile(); err != nil {
 		return nil, fmt.Errorf("error decompiling bytecode: %w", err)
@@ -67,7 +43,7 @@ func NewCFG(bytecode []byte) (*CFG, error) {
 
 	instructions := decompiler.GetInstructions()
 
-	cfg := &CFG{
+	cfg := &CfgDecoder{
 		nodes:        make(map[int]*Node),
 		entry:        nil,
 		exit:         nil,
@@ -85,19 +61,19 @@ func NewCFG(bytecode []byte) (*CFG, error) {
 }
 
 // Detect initiates the loop detection process on the Control Flow Graph.
-func (cfg *CFG) Detect() {
+func (cfg *CfgDecoder) Detect() {
 	cfg.DetectLoops()
 }
 
 // createNodes creates the nodes of the Control Flow Graph.
-func (cfg *CFG) createNodes() {
+func (cfg *CfgDecoder) createNodes() {
 	for _, instruction := range cfg.instructions {
 		cfg.addNode(instruction.Offset)
 	}
 }
 
 // addNode adds a node to the Control Flow Graph.
-func (cfg *CFG) addNode(offset int) {
+func (cfg *CfgDecoder) addNode(offset int) {
 	if _, ok := cfg.nodes[offset]; !ok {
 		node := &Node{
 			Offset:         offset,
@@ -109,7 +85,7 @@ func (cfg *CFG) addNode(offset int) {
 }
 
 // connectNodes connects the nodes of the Control Flow Graph.
-func (cfg *CFG) connectNodes() {
+func (cfg *CfgDecoder) connectNodes() {
 	for i, instruction := range cfg.instructions {
 		node := cfg.nodes[instruction.Offset]
 
@@ -142,8 +118,8 @@ func (cfg *CFG) connectNodes() {
 }
 
 // Reverse returns a new Control Flow Graph with reversed edges.
-func (cfg *CFG) Reverse() *CFG {
-	reversedCFG := &CFG{
+func (cfg *CfgDecoder) Reverse() *CfgDecoder {
+	reversedCFG := &CfgDecoder{
 		nodes:        make(map[int]*Node),
 		entry:        cfg.exit,
 		exit:         cfg.entry,
@@ -170,7 +146,7 @@ func (cfg *CFG) Reverse() *CFG {
 }
 
 // connectReversedNodes connects reversed nodes in the Control Flow Graph.
-func (cfg *CFG) connectReversedNodes(from, to int) {
+func (cfg *CfgDecoder) connectReversedNodes(from, to int) {
 	fromNode := cfg.nodes[from]
 	toNode := cfg.nodes[to]
 
@@ -184,7 +160,7 @@ func (cfg *CFG) connectReversedNodes(from, to int) {
 }
 
 // Print prints the Control Flow Graph.
-func (cfg *CFG) Print() {
+func (cfg *CfgDecoder) Print() {
 	fmt.Println("Control Flow Graph:")
 	fmt.Println("Entry:", cfg.entry.Offset)
 
@@ -205,7 +181,7 @@ func (cfg *CFG) Print() {
 }
 
 // PerformDominatorAnalysis performs dominator analysis on the Control Flow Graph.
-func (cfg *CFG) PerformDominatorAnalysis() {
+func (cfg *CfgDecoder) PerformDominatorAnalysis() {
 	// Initialize dominators of each node to include itself
 	for _, node := range cfg.nodes {
 		node.Dominators[node] = true
@@ -227,7 +203,7 @@ func (cfg *CFG) PerformDominatorAnalysis() {
 }
 
 // computeDominators computes the dominators of a node in the Control Flow Graph.
-func (cfg *CFG) computeDominators(node *Node) {
+func (cfg *CfgDecoder) computeDominators(node *Node) {
 	changed := true
 	for changed {
 		changed = false
@@ -258,7 +234,7 @@ func (cfg *CFG) computeDominators(node *Node) {
 }
 
 // removeDeadCode removes dead code from the Control Flow Graph.
-func (cfg *CFG) RemoveDeadCode() {
+func (cfg *CfgDecoder) RemoveDeadCode() {
 	reachableNodes := cfg.findReachableNodes()
 	for offset := range cfg.nodes {
 		if _, ok := reachableNodes[offset]; !ok {
@@ -268,14 +244,14 @@ func (cfg *CFG) RemoveDeadCode() {
 }
 
 // findReachableNodes finds the reachable nodes in the Control Flow Graph.
-func (cfg *CFG) findReachableNodes() map[int]*Node {
+func (cfg *CfgDecoder) findReachableNodes() map[int]*Node {
 	reachableNodes := make(map[int]*Node)
 	cfg.markReachable(cfg.entry, reachableNodes)
 	return reachableNodes
 }
 
 // markReachable marks the reachable nodes in the Control Flow Graph.
-func (cfg *CFG) markReachable(node *Node, reachableNodes map[int]*Node) {
+func (cfg *CfgDecoder) markReachable(node *Node, reachableNodes map[int]*Node) {
 	if _, ok := reachableNodes[node.Offset]; ok {
 		// Node has already been visited
 		return

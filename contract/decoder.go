@@ -7,8 +7,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/txpull/bytecode/cfg"
 	"github.com/txpull/bytecode/clients"
+	"github.com/txpull/bytecode/controlflow"
 	"github.com/txpull/bytecode/db"
 	"github.com/txpull/bytecode/opcodes"
 	"go.uber.org/zap"
@@ -153,7 +153,7 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		toReturn.BytecodeSize = decompiler.GetBytecodeSize()
 		toReturn.OpCodes = decompiler
 
-		graph, err := cfg.NewCFG(bytecode)
+		graph, err := controlflow.NewDecoder(bytecode)
 		if err != nil {
 			zap.L().Error("failed to create control flow graph", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
 			return nil, err

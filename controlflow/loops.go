@@ -1,32 +1,4 @@
-/*
-Package cfg provides functionality for creating and analyzing Control Flow Graphs (CFGs) for Ethereum smart contracts.
-
-Control Flow Graphs represent the flow of execution within a program by modeling the relationships between different instructions or blocks of code.
-
-The Loop struct represents a loop in the Control Flow Graph and contains information about its header, exit node, loop nodes, loop bounds, and loop invariants.
-
-Example usage:
-
-	cfg, err := NewCFG(bytecode)
-	if err != nil {
-		// Handle error
-	}
-
-	cfg.DetectLoops() // Detect loops in the Control Flow Graph
-
-	for _, loop := range cfg.Loops {
-		// Process each loop
-		fmt.Println("Loop Header:", loop.Header.Offset)
-		fmt.Println("Loop Exit:", loop.Exit.Offset)
-		fmt.Println("Loop Nodes:")
-		for _, node := range loop.LoopNodes {
-			fmt.Printf("  Node: %d\n", node.Offset)
-		}
-		fmt.Println("Loop Bounds:", loop.LoopBounds)
-		fmt.Println("Loop Invariants:", loop.LoopInvariants)
-	}
-*/
-package cfg
+package controlflow
 
 import (
 	"fmt"
@@ -45,7 +17,7 @@ type Loop struct {
 }
 
 // DetectLoops detects loops in the Control Flow Graph.
-func (cfg *CFG) DetectLoops() {
+func (cfg *CfgDecoder) DetectLoops() {
 	visited := make(map[*Node]bool)
 	for _, node := range cfg.nodes {
 		if visited[node] {
@@ -56,7 +28,7 @@ func (cfg *CFG) DetectLoops() {
 }
 
 // detectLoop detects a loop starting from the given node in the Control Flow Graph.
-func (cfg *CFG) detectLoop(node *Node, visited map[*Node]bool) {
+func (cfg *CfgDecoder) detectLoop(node *Node, visited map[*Node]bool) {
 	loopBounds := make([]int, 0)
 	loopInvariants := make([]string, 0)
 	exitNode := node
@@ -81,7 +53,7 @@ func (cfg *CFG) detectLoop(node *Node, visited map[*Node]bool) {
 }
 
 // depthLimitedDFS performs a depth-limited depth-first search to detect loops in the Control Flow Graph.
-func (cfg *CFG) depthLimitedDFS(node *Node, visited map[*Node]bool, loopBounds []int, loopInvariants []string, depth int, exitNode **Node) bool {
+func (cfg *CfgDecoder) depthLimitedDFS(node *Node, visited map[*Node]bool, loopBounds []int, loopInvariants []string, depth int, exitNode **Node) bool {
 	visited[node] = true
 
 	// Ensure node.Offset is within the valid range of indices

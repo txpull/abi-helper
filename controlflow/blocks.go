@@ -1,10 +1,10 @@
-package cfg
+package controlflow
 
 type Block struct {
 	Nodes []*Node
 }
 
-func (cfg *CFG) createBlocks() {
+func (cfg *CfgDecoder) createBlocks() {
 	block := &Block{}
 
 	for _, node := range cfg.nodes {

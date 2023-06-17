@@ -13,3 +13,4 @@ Later on we will be switching to projects and more concrete way of tracking new 
 - [ ] Extend signatures to download new signatures from 4byte.dictionary and other services including parsing abis and writing signatures from abis.
 - [ ] Add support for hooks into writers.
 - [ ] Add clickhouse support including writer hooks.
+- [ ] Control Flow Graphs (CFGs) to Abstract Syntax Tree (AST)

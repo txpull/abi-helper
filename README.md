@@ -25,6 +25,7 @@ I am on a weekly basis implementing different aspects, rearranging existing pack
 - [x] Ability to potentially get transaction method id and arguments from contracts without abi.
 - [x] 3rd party contract code scanners (BscScan).
 - [x] Commands and utilities that can download and read verified contracts from bscscan.
+- [x] Bytecode to Control Flow Graphs (CFGs)
 
 ## TODO
 

@@ -4,7 +4,6 @@ package contract
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -154,8 +153,6 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		toReturn.BytecodeSize = decompiler.GetBytecodeSize()
 		toReturn.OpCodes = decompiler
 
-		fmt.Println(common.Bytes2Hex(decompiler.GetBytecode()))
-
 		graph, err := cfg.NewCFG(bytecode)
 		if err != nil {
 			zap.L().Error("failed to create control flow graph", zap.String("tx_hash", tx.Hash().Hex()), zap.Error(err))
@@ -164,7 +161,7 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 
 		toReturn.ControlFlowGraph = graph
 
-		// Perform path analysis and obtain the paths
+		/* 	// Perform path analysis and obtain the paths
 		paths := graph.FindAllPaths()
 
 		// Access the paths
@@ -175,7 +172,7 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 				fmt.Printf("%d -> ", node.Offset)
 			}
 			fmt.Println("Exit")
-		}
+		} */
 	}
 
 	return toReturn, nil

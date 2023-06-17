@@ -1,3 +1,31 @@
+/*
+Package cfg provides functionality for creating and analyzing Control Flow Graphs (CFGs) for Ethereum smart contracts.
+
+Control Flow Graphs represent the flow of execution within a program by modeling the relationships between different instructions or blocks of code.
+
+The Loop struct represents a loop in the Control Flow Graph and contains information about its header, exit node, loop nodes, loop bounds, and loop invariants.
+
+Example usage:
+
+	cfg, err := NewCFG(bytecode)
+	if err != nil {
+		// Handle error
+	}
+
+	cfg.DetectLoops() // Detect loops in the Control Flow Graph
+
+	for _, loop := range cfg.Loops {
+		// Process each loop
+		fmt.Println("Loop Header:", loop.Header.Offset)
+		fmt.Println("Loop Exit:", loop.Exit.Offset)
+		fmt.Println("Loop Nodes:")
+		for _, node := range loop.LoopNodes {
+			fmt.Printf("  Node: %d\n", node.Offset)
+		}
+		fmt.Println("Loop Bounds:", loop.LoopBounds)
+		fmt.Println("Loop Invariants:", loop.LoopInvariants)
+	}
+*/
 package cfg
 
 import (
@@ -7,15 +35,17 @@ import (
 	"github.com/txpull/bytecode/opcodes"
 )
 
+// Loop represents a loop in the Control Flow Graph.
 type Loop struct {
-	Header         *Node
-	Exit           *Node
-	LoopNodes      []*Node
-	LoopBounds     []int
-	LoopInvariants []string
+	Header         *Node    // Header node of the loop
+	Exit           *Node    // Exit node of the loop
+	LoopNodes      []*Node  // Nodes within the loop
+	LoopBounds     []int    // Bounds of the loop
+	LoopInvariants []string // Invariants of the loop
 }
 
-func (cfg *CFG) detectLoops() {
+// DetectLoops detects loops in the Control Flow Graph.
+func (cfg *CFG) DetectLoops() {
 	visited := make(map[*Node]bool)
 	for _, node := range cfg.nodes {
 		if visited[node] {
@@ -25,6 +55,7 @@ func (cfg *CFG) detectLoops() {
 	}
 }
 
+// detectLoop detects a loop starting from the given node in the Control Flow Graph.
 func (cfg *CFG) detectLoop(node *Node, visited map[*Node]bool) {
 	loopBounds := make([]int, 0)
 	loopInvariants := make([]string, 0)
@@ -32,7 +63,7 @@ func (cfg *CFG) detectLoop(node *Node, visited map[*Node]bool) {
 
 	// Iterate through the graph using an iterative deepening depth-first search (IDDFS)
 	for depth := 1; depth <= len(cfg.nodes); depth++ {
-		if cfg.dfs(node, visited, loopBounds, loopInvariants, depth, &exitNode) {
+		if cfg.depthLimitedDFS(node, visited, loopBounds, loopInvariants, depth, &exitNode) {
 			break
 		}
 	}
@@ -49,7 +80,8 @@ func (cfg *CFG) detectLoop(node *Node, visited map[*Node]bool) {
 	}
 }
 
-func (cfg *CFG) dfs(node *Node, visited map[*Node]bool, loopBounds []int, loopInvariants []string, depth int, exitNode **Node) bool {
+// depthLimitedDFS performs a depth-limited depth-first search to detect loops in the Control Flow Graph.
+func (cfg *CFG) depthLimitedDFS(node *Node, visited map[*Node]bool, loopBounds []int, loopInvariants []string, depth int, exitNode **Node) bool {
 	visited[node] = true
 
 	// Ensure node.Offset is within the valid range of indices
@@ -84,7 +116,7 @@ func (cfg *CFG) dfs(node *Node, visited map[*Node]bool, loopBounds []int, loopIn
 		if *exitNode == nil || node.Next.Offset > (*exitNode).Offset {
 			*exitNode = node.Next
 		}
-		if cfg.dfs(node.Next, visited, loopBounds, loopInvariants, depth-1, exitNode) {
+		if cfg.depthLimitedDFS(node.Next, visited, loopBounds, loopInvariants, depth-1, exitNode) {
 			return true
 		}
 	}
@@ -93,7 +125,7 @@ func (cfg *CFG) dfs(node *Node, visited map[*Node]bool, loopBounds []int, loopIn
 		if *exitNode == nil || node.Branch.Offset > (*exitNode).Offset {
 			*exitNode = node.Branch
 		}
-		if cfg.dfs(node.Branch, visited, loopBounds, loopInvariants, depth-1, exitNode) {
+		if cfg.depthLimitedDFS(node.Branch, visited, loopBounds, loopInvariants, depth-1, exitNode) {
 			return true
 		}
 	}
@@ -102,7 +134,7 @@ func (cfg *CFG) dfs(node *Node, visited map[*Node]bool, loopBounds []int, loopIn
 		if *exitNode == nil || node.Function.Offset > (*exitNode).Offset {
 			*exitNode = node.Function
 		}
-		if cfg.dfs(node.Function, visited, loopBounds, loopInvariants, depth-1, exitNode) {
+		if cfg.depthLimitedDFS(node.Function, visited, loopBounds, loopInvariants, depth-1, exitNode) {
 			return true
 		}
 	}
@@ -110,6 +142,7 @@ func (cfg *CFG) dfs(node *Node, visited map[*Node]bool, loopBounds []int, loopIn
 	return false
 }
 
+// getLoopNodes returns the nodes within a loop starting from the header node until the exit node is reached.
 func (node *Node) getLoopNodes(exitNode *Node) []*Node {
 	loopNodes := make([]*Node, 0)
 	loopNodes = append(loopNodes, node)

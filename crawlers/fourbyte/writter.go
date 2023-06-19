@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -19,12 +20,20 @@ import (
 // BDB_NAME_LAST_PROCESSED_PAGE_KEY is the key for the last processed page number in BadgerDB.
 const BDB_NAME_LAST_PROCESSED_PAGE_KEY = "last_processed_fourbyte_page_num"
 
+// PreHook is a function that runs before Crawl.
+type PreWriteHook func(signature *signatures.Signature) (*signatures.Signature, error)
+
+// PostHook is a function that runs after Crawl.
+type PostWriteHook func(signature *signatures.Signature) error
+
 // FourByteWriter provides a crawler which processes pages and saves signatures to a BadgerDB.
 type FourByteWriter struct {
-	ctx      context.Context            // Context to control the crawling process.
-	provider *scanners.FourByteProvider // Provider used to fetch pages.
-	db       *db.BadgerDB               // BadgerDB instance for storing signatures.
-	cooldown time.Duration              // Cooldown duration between page fetches.
+	ctx           context.Context            // Context to control the crawling process.
+	provider      *scanners.FourByteProvider // Provider used to fetch pages.
+	db            *db.BadgerDB               // BadgerDB instance for storing signatures.
+	cooldown      time.Duration              // Cooldown duration between page fetches.
+	preWriteHook  PreWriteHook               // Pre-hook function that runs before Crawl.
+	postWriteHook PostWriteHook              // Post-hook function that runs after Crawl.
 }
 
 // WriterOption is a functional option for customizing the FourByteWriter.
@@ -78,6 +87,38 @@ func WithCooldown(cooldown time.Duration) WriterOption {
 	}
 }
 
+// WithPreHook sets the pre-hook function for the FourByteWriter.
+//
+// Example:
+//
+//	preHook := func() error {
+//		// ... pre-processing tasks ...
+//		return nil
+//	}
+//
+//	crawler := NewFourByteWriter(WithPreHook(preHook))
+func WithPreHook(hook PreWriteHook) WriterOption {
+	return func(c *FourByteWriter) {
+		c.preWriteHook = hook
+	}
+}
+
+// WithPostHook sets the post-hook function for the FourByteWriter.
+//
+// Example:
+//
+//	postHook := func() error {
+//		// ... post-processing tasks ...
+//		return nil
+//	}
+//
+//	crawler := NewFourByteWriter(WithPostHook(postHook))
+func WithPostHook(hook PostWriteHook) WriterOption {
+	return func(c *FourByteWriter) {
+		c.postWriteHook = hook
+	}
+}
+
 // NewFourByteWriter creates a new FourByteWriter instance with the provided options.
 //
 // By default, FourByteWriter uses a background context and a cooldown period of 200ms.
@@ -99,10 +140,12 @@ func WithCooldown(cooldown time.Duration) WriterOption {
 //	)
 func NewFourByteWriter(opts ...WriterOption) *FourByteWriter {
 	writer := &FourByteWriter{
-		ctx:      context.Background(),
-		provider: nil,
-		db:       nil,
-		cooldown: 200 * time.Millisecond,
+		ctx:           context.Background(),
+		provider:      nil,
+		db:            nil,
+		cooldown:      200 * time.Millisecond,
+		preWriteHook:  nil, // No pre-hook by default.
+		postWriteHook: nil, // No post-hook by default.
 	}
 
 	for _, opt := range opts {
@@ -165,11 +208,31 @@ func (w *FourByteWriter) Crawl() error {
 			)
 
 			if len(signature.Hex) > 0 {
+				// If a pre-hook function has been set, run it.
+				if w.preWriteHook != nil {
+					var err error
+					signature, err = w.preWriteHook(signature)
+					if err != nil {
+						zap.L().Error("Pre-hook function failed", zap.Error(err))
+						return err
+					}
+				}
+
 				// Save the signature to the database if it does not exist.
 				if err := w.saveSignatureIfNotExists(signature); err != nil {
 					zap.L().Error("Failed to save signature", zap.Error(err))
 					return err
 				}
+
+				if w.postWriteHook != nil {
+					if err := w.postWriteHook(signature); err != nil {
+						zap.L().Error("failed to execute signature post write hook", zap.Error(err))
+						return err
+					}
+				}
+
+				os.Exit(1)
+				return nil
 			}
 		}
 

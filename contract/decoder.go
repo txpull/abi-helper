@@ -160,19 +160,6 @@ func (c *ContractDecoder) ProcessContractCreationTx(block *types.Block, tx *type
 		}
 
 		toReturn.ControlFlowGraph = graph
-
-		/* 	// Perform path analysis and obtain the paths
-		paths := graph.FindAllPaths()
-
-		// Access the paths
-		fmt.Println("Number of paths:", len(paths))
-		for i, path := range paths {
-			fmt.Printf("Path %d: ", i+1)
-			for _, node := range path {
-				fmt.Printf("%d -> ", node.Offset)
-			}
-			fmt.Println("Exit")
-		} */
 	}
 
 	return toReturn, nil

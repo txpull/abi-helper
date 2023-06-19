@@ -140,6 +140,10 @@ func (d *BadgerDB) Exists(key string) (bool, error) {
 	return exists, err
 }
 
+func (d *BadgerDB) DB() *badger.DB {
+	return d.db
+}
+
 // Close closes the BadgerDB.
 //
 // Example usage:

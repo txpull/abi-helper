@@ -8,7 +8,6 @@ import (
 	"github.com/txpull/bytecode/controlflow"
 	"github.com/txpull/bytecode/opcodes"
 	"github.com/txpull/bytecode/signatures"
-	"github.com/txpull/bytecode/solidity"
 )
 
 // ContractCreationTxResult is a structure that encapsulates the result of processing
@@ -52,9 +51,6 @@ type ContractCreationTxResult struct {
 
 	// ABI represents the decoded contract ABI.
 	ABI *abi.Decoder `json:"-"`
-
-	// SourceCode represents the decoded source code of the contract.
-	SourceCode *solidity.Decoder `json:"-"`
 
 	// Signatures represents the signatures used in the contract.
 	Signatures []*signatures.Signature `json:"signatures"`

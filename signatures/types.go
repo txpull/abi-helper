@@ -23,7 +23,7 @@ type Signature struct {
 type InputOutput struct {
 	Name  string `json:"name"`
 	Type  string `json:"type"`
-	Index int    `json:"type"`
+	Index int    `json:"index"`
 }
 
 func (r *Signature) MarshalBytes() ([]byte, error) {

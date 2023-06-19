@@ -38,7 +38,7 @@ var fourbyteCmd = &cobra.Command{
 	Use:   "fourbyte",
 	Short: "Download, process and store signatures from 4byte.directory",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		databasePath := viper.GetString("fourbyte.crawler.database_path")
+		databasePath := viper.GetString("database.badger.path")
 
 		if databasePath == "" {
 			currentDir, err := os.Getwd()
@@ -57,18 +57,45 @@ var fourbyteCmd = &cobra.Command{
 		defer bdb.Close()
 		go bdb.GarbageCollect()
 
+		var fourbOpts []fourbyte.WriterOption
+
 		provider := scanners.NewFourByteProvider(
-			scanners.WithURL("https://www.4byte.directory/api/v1/signatures/"), // Replace with your URL
+			scanners.WithContext(cmd.Context()),
+			scanners.WithURL(viper.GetString("syncers.fourbyte.url")), // Replace with your URL
 			scanners.WithMaxRetries(3),
 			scanners.WithContext(cmd.Context()),
 		)
 
-		crawler := fourbyte.NewFourByteWriter(
+		opts := append(fourbOpts,
 			fourbyte.WithContext(cmd.Context()),
 			fourbyte.WithProvider(provider),
 			fourbyte.WithDB(bdb),
 			fourbyte.WithCooldown(100*time.Millisecond),
 		)
+
+		// If ClickHouse is enabled, we are going to write signatures into it
+		if viper.GetBool("syncers.fourbyte.write_to_clickhouse") {
+			cdb, err := db.NewClickHouse(
+				db.WithCtx(cmd.Context()),
+				db.WithDebug(true),
+				db.WithHost(viper.GetString("database.clickhouse.host")),
+				db.WithDatabase(viper.GetString("database.clickhouse.database")),
+				db.WithUsername(viper.GetString("database.clickhouse.username")),
+				db.WithPassword(viper.GetString("database.clickhouse.password")),
+			)
+			if err != nil {
+				return err
+			}
+
+			// Will create database if it does not exist and return error if it fails
+			if err := cdb.CreateDatabase(viper.GetString("database.clickhouse.database")); err != nil {
+				return err
+			}
+
+			opts = append(opts, fourbyte.WithPostHook(fourbyte.PostWriteClickHouseHook(cdb)))
+		}
+
+		crawler := fourbyte.NewFourByteWriter(opts...)
 
 		if err := crawler.Crawl(); err != nil {
 			return err

@@ -30,3 +30,4 @@ data/bscscan/verified-contracts.gob
 
 # Example binaries that should not be included
 examples/contract/contract
+examples/abi/abi

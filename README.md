@@ -1,6 +1,6 @@
 # unpack
 
-Set of tools to help decoding bytecode, transactions, blocks, receipts and logs for Ethereum based chains.
+Set of tools to help decoding unpack, transactions, blocks, receipts and logs for Ethereum based chains.
 
 ## WARNING
 
@@ -17,7 +17,7 @@ I am on a weekly basis implementing different aspects, rearranging existing pack
 ## Features
 
 - [x] Automatic fixtures (sample data) download direcly from (bsc|eth) mainnet used for tests.
-- [x] Opcode discovery from any contract `bytecode` that is deployed on the (bsc|eth) mainnets.
+- [x] Opcode discovery from any contract `unpack` that is deployed on the (bsc|eth) mainnets.
 - [x] Reading signature database.
 - [x] Ability to get opcode for any transaction that contains appropriate data.
 - [x] Ability to potentially get transaction method id and arguments from contracts without abi.
@@ -38,7 +38,7 @@ If you discover any bugs, please use issues to report. Thanks!
 
 ## Configuration
 
-The `bytecode` can be configured using a config file (default: `.unpack.yaml`) and environment variables. 
+The `unpack` can be configured using a config file (default: `.unpack.yaml`) and environment variables. 
 
 You can see sample configuration file at [.txpull.config.sample.yml].
 
@@ -56,10 +56,10 @@ The following configuration options are available:
 
 ## Installation
 
-To install the bytecode, follow these steps:
+To install the unpack, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/txpull/unpack.git`
-2. Navigate to the project directory: `cd bytecode`
+2. Navigate to the project directory: `cd unpack`
 3. Build the binary: `make install`
 
 For preparation and how-to fetch data and get this repository going on the right way visit [INSTALL.md].
@@ -68,7 +68,7 @@ For preparation and how-to fetch data and get this repository going on the right
 
 ## CLI Usage
 
-The `bytecode` provides the following CLI commands:
+The `unpack` provides the following CLI commands:
 
 ### Command: unpack
 
@@ -149,7 +149,7 @@ PASS
 
 ## License
 
-The bytecode is licensed under the MIT License. See the [LICENSE] file for more details.
+The unpack is licensed under the MIT License. See the [LICENSE] file for more details.
 
 [INSTALL.md]: </docs/INSTALL.md>
 [BUGS.md]: <BUGS.md>

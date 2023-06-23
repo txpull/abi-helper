@@ -1,12 +1,10 @@
-# bytecode
+# unpack
 
 Set of tools to help decoding bytecode, transactions, blocks, receipts and logs for Ethereum based chains.
 
 ## WARNING
 
 **Work In Progress!**
-
-By it, everything about this project can change including the repository name. More I code it, more I understand that bytecode is not the correct name for the repository. I don't want to rush with naming and change it oftenly but, that being said, be aware, it will change.
 
 I am on a weekly basis implementing different aspects, rearranging existing packages and working towards something that will be useful for txpull overall and wider audiences.
 

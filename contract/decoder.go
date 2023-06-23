@@ -7,10 +7,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/txpull/bytecode/clients"
-	"github.com/txpull/bytecode/controlflow"
-	"github.com/txpull/bytecode/db"
-	"github.com/txpull/bytecode/opcodes"
+	"github.com/txpull/unpack/clients"
+	"github.com/txpull/unpack/controlflow"
+	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/opcodes"
 	"go.uber.org/zap"
 )
 

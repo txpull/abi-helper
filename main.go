@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/txpull/bytecode/cmd"
-	"github.com/txpull/bytecode/logger"
+	"github.com/txpull/unpack/cmd"
+	"github.com/txpull/unpack/logger"
 
 	"go.uber.org/zap"
 )

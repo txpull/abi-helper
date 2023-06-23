@@ -3,7 +3,7 @@ package fixtures
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/txpull/bytecode/utils"
+	"github.com/txpull/unpack/utils"
 )
 
 func ReadBlockFixtures() ([]*types.Block, error) {

@@ -46,8 +46,8 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/bytecode/db"
-	"github.com/txpull/bytecode/scanners"
+	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/scanners"
 	"go.uber.org/zap"
 )
 

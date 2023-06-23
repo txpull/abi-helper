@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/txpull/bytecode/clients"
-	"github.com/txpull/bytecode/utils"
+	"github.com/txpull/unpack/clients"
+	"github.com/txpull/unpack/utils"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"

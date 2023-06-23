@@ -3,7 +3,7 @@ package fixtures_test
 import (
 	"testing"
 
-	"github.com/txpull/bytecode/fixtures"
+	"github.com/txpull/unpack/fixtures"
 
 	"github.com/stretchr/testify/assert"
 )

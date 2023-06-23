@@ -2,7 +2,7 @@ package abi
 
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/txpull/bytecode/signatures"
+	"github.com/txpull/unpack/signatures"
 )
 
 type Abi struct {

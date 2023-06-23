@@ -27,7 +27,7 @@ in the CSV into `/data/bscscan/verified-contracts.gob` for future processing. On
 - You will need manually to download CSV files in time to time. I will be doing it as well but if I miss it, well you'll have to do it and replace files. There is no automatic way to download the csv as it's behind the captcha.
 
 ```
-txbyte syncer bscscan --config ./.txbyte.yaml
+unpack syncer bscscan --config ./.unpack.yaml
 ```
 
 #### Contract Processing
@@ -45,7 +45,7 @@ Great thing is that we are keeping processed pages so if you stop it, or restart
 Data is stored in [BadgerDB].
 
 ```
-txbyte syncer fourbyte --config ./.txbyte.yaml
+unpack syncer fourbyte --config ./.unpack.yaml
 ```
 
 

@@ -40,7 +40,7 @@ If you discover any bugs, please use issues to report. Thanks!
 
 ## Configuration
 
-The `bytecode` can be configured using a config file (default: `.txbyte.yaml`) and environment variables. 
+The `bytecode` can be configured using a config file (default: `.unpack.yaml`) and environment variables. 
 
 You can see sample configuration file at [.txpull.config.sample.yml].
 
@@ -60,7 +60,7 @@ The following configuration options are available:
 
 To install the bytecode, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/txpull/bytecode.git`
+1. Clone the repository: `git clone https://github.com/txpull/unpack.git`
 2. Navigate to the project directory: `cd bytecode`
 3. Build the binary: `make install`
 
@@ -72,23 +72,23 @@ For preparation and how-to fetch data and get this repository going on the right
 
 The `bytecode` provides the following CLI commands:
 
-### Command: txbyte
+### Command: unpack
 
 This is the base command for the application.
 
-Usage: `txbyte <command>`
+Usage: `unpack <command>`
 
 ### Command: version
 
 Displays the current version of the application.
 
-Usage: `txbyte version`
+Usage: `unpack version`
 
 ### Command: syncer
 
 Commands related to syncing data from third-party sources.
 
-Usage: `txbyte syncer <subcommand>`
+Usage: `unpack syncer <subcommand>`
 
 Replace `<subcommand>` with one of the following:
 - `bscscan`: Process verified contracts from bscscan.
@@ -110,7 +110,7 @@ ethereum and/or bsc network. If you don't have your own node, you can find free 
 
 Commands related to obtaining unit test data.
 
-Usage: `txbyte fixtures <subcommand>`
+Usage: `unpack fixtures <subcommand>`
 
 Replace `<subcommand>` with one of the following:
 - `generate-eth`: Generate Ethereum-based fixtures and write them into (block|transactions|receipt).gob files.
@@ -120,7 +120,7 @@ Replace `<subcommand>` with one of the following:
 Generates Ethereum-based fixtures and writes them into (block|transactions|receipt).gob files.
 These files are currently used for ETH and BSC tests.
 
-Usage: `txbyte fixtures generate-eth --eth.node.url <node-url> --eth.node.concurrent_clients_number <num> --eth.generator.start_block_number <start-block> --eth.generator.end_block_number <end-block>`
+Usage: `unpack fixtures generate-eth --eth.node.url <node-url> --eth.node.concurrent_clients_number <num> --eth.generator.start_block_number <start-block> --eth.generator.end_block_number <end-block>`
 
 Replace the following parameters:
 - `<node-url>`: Ethereum-based node full URL (example: https://node-url:port).
@@ -142,7 +142,7 @@ make test
 ```
 goos: linux
 goarch: amd64
-pkg: github/txpull/bytecode/optcodes
+pkg: github/txpull/unpack/optcodes
 cpu: AMD Ryzen Threadripper 3960X 24-Core Processor 
 BenchmarkDecompiler_Performance
 BenchmarkDecompiler_Performance-48    	       7	 184002805 ns/op	288450341 B/op	       8 allocs/op

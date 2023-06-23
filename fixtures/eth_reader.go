@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/txpull/bytecode/utils"
+	"github.com/txpull/unpack/utils"
 )
 
 // EthReader is a structure that provides methods for discovering Ethereum blocks, transactions, and receipts.

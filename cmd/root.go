@@ -26,9 +26,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	fixtures_cmd "github.com/txpull/bytecode/cmd/fixtures"
-	syncers_cmd "github.com/txpull/bytecode/cmd/syncers"
-	"github.com/txpull/bytecode/utils"
+	fixtures_cmd "github.com/txpull/unpack/cmd/fixtures"
+	syncers_cmd "github.com/txpull/unpack/cmd/syncers"
+	"github.com/txpull/unpack/utils"
 	"go.uber.org/zap"
 )
 
@@ -36,7 +36,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "txbyte",
+	Use:   "unpack",
 	Short: "A brief description of your application",
 }
 
@@ -68,7 +68,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.txbyte.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.unpack.yaml)")
 
 	// Load syncers subcommands designed to sync data from third party sources
 	syncers_cmd.Init(rootCmd)

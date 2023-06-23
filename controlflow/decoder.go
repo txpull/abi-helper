@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/bytecode/opcodes"
+	"github.com/txpull/unpack/opcodes"
 )
 
 // Decoder represents a Control Flow Graph.

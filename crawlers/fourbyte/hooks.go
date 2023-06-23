@@ -1,8 +1,8 @@
 package fourbyte
 
 import (
-	"github.com/txpull/bytecode/db"
-	"github.com/txpull/bytecode/signatures"
+	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/signatures"
 )
 
 func PostWriteClickHouseHook(db *db.ClickHouse) PostWriteHook {

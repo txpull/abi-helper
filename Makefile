@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-BIN_NAME := build/txbyte
+BIN_NAME := build/unpack
 PKG := bytecode
 VERSION := 1.0.0
 UNAME_S := $(shell uname -s 2>/dev/null || echo "unknown")

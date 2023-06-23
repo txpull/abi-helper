@@ -22,7 +22,7 @@ go.work
 
 
 # Workspace related files
-.txbyte.yaml
+.unpack.yaml
 build/*
 *.go.prototype
 .test.env

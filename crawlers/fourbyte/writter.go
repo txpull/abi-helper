@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/txpull/bytecode/db"
-	"github.com/txpull/bytecode/scanners"
-	"github.com/txpull/bytecode/signatures"
-	"github.com/txpull/bytecode/utils"
+	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/scanners"
+	"github.com/txpull/unpack/signatures"
+	"github.com/txpull/unpack/utils"
 	"go.uber.org/zap"
 )
 

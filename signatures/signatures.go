@@ -7,7 +7,7 @@ package signatures
 import (
 	"strings"
 
-	"github.com/txpull/bytecode/db"
+	"github.com/txpull/unpack/db"
 )
 
 // SignaturesReader represents a collection of signatures and provides methods for interacting with them.

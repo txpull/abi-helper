@@ -25,7 +25,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/txpull/bytecode/fixtures"
+	"github.com/txpull/unpack/fixtures"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

@@ -5,9 +5,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/txpull/bytecode/clients"
-	"github.com/txpull/bytecode/fixtures"
-	"github.com/txpull/bytecode/helpers"
+	"github.com/txpull/unpack/clients"
+	"github.com/txpull/unpack/fixtures"
+	"github.com/txpull/unpack/helpers"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/stretchr/testify/assert"

@@ -9,11 +9,11 @@ import (
 
 // InitConfig initializes the configuration settings. It attempts to read a
 // configuration file located either at the path specified by the `cfgFile`
-// parameter, or within the user's home directory with the name ".txbyte" and
+// parameter, or within the user's home directory with the name ".unpack" and
 // extension ".yaml".
 //
 // cfgFile: The path to the configuration file. If this parameter is an empty
-// string, InitConfig will attempt to search for a ".txbyte.yaml" file in the
+// string, InitConfig will attempt to search for a ".unpack.yaml" file in the
 // user's home directory.
 //
 // This function will also read in environment variables that match the keys in
@@ -38,10 +38,10 @@ func InitConfig(cfgFile string) error {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".txbyte" (with .yaml extension).
+		// Search config in home directory with name ".unpack" (with .yaml extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".txbyte")
+		viper.SetConfigName(".unpack")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

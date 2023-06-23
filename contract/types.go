@@ -4,10 +4,10 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/bytecode/abi"
-	"github.com/txpull/bytecode/controlflow"
-	"github.com/txpull/bytecode/opcodes"
-	"github.com/txpull/bytecode/signatures"
+	"github.com/txpull/unpack/abi"
+	"github.com/txpull/unpack/controlflow"
+	"github.com/txpull/unpack/opcodes"
+	"github.com/txpull/unpack/signatures"
 )
 
 // ContractCreationTxResult is a structure that encapsulates the result of processing

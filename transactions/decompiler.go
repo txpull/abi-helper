@@ -6,8 +6,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/txpull/bytecode/opcodes"
-	"github.com/txpull/bytecode/signatures"
+	"github.com/txpull/unpack/opcodes"
+	"github.com/txpull/unpack/signatures"
 	"go.uber.org/zap"
 )
 

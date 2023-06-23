@@ -27,9 +27,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	bscscan_crawler "github.com/txpull/bytecode/crawlers/bscscan"
-	"github.com/txpull/bytecode/db"
-	"github.com/txpull/bytecode/scanners"
+	bscscan_crawler "github.com/txpull/unpack/crawlers/bscscan"
+	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/scanners"
 	"go.uber.org/zap"
 )
 

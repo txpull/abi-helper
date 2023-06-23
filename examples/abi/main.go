@@ -12,13 +12,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/viper"
-	"github.com/txpull/bytecode/abi"
-	"github.com/txpull/bytecode/clients"
-	"github.com/txpull/bytecode/crawlers/bscscan"
-	"github.com/txpull/bytecode/db"
-	"github.com/txpull/bytecode/fixtures"
-	"github.com/txpull/bytecode/logger"
-	"github.com/txpull/bytecode/utils"
+	"github.com/txpull/unpack/abi"
+	"github.com/txpull/unpack/clients"
+	"github.com/txpull/unpack/crawlers/bscscan"
+	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/fixtures"
+	"github.com/txpull/unpack/logger"
+	"github.com/txpull/unpack/utils"
 	"go.uber.org/zap"
 )
 
@@ -41,7 +41,7 @@ func main() {
 	// passing by reference logger everywhere.
 	zap.ReplaceGlobals(logger)
 
-	cfgFile := flag.String("config", "../../.txbyte.yaml", "Path to the configuration file")
+	cfgFile := flag.String("config", "../../.unpack.yaml", "Path to the configuration file")
 	flag.Parse()
 
 	if err := utils.InitConfig(*cfgFile); err != nil {

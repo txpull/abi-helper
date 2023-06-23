@@ -1,4 +1,4 @@
-module github.com/txpull/bytecode
+module github.com/txpull/unpack
 
 go 1.19
 

@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/helpers"
 	"github.com/txpull/unpack/scanners"
 	"github.com/txpull/unpack/signatures"
-	"github.com/txpull/unpack/utils"
 	"go.uber.org/zap"
 )
 
@@ -193,7 +193,7 @@ func (w *FourByteWriter) Crawl() error {
 		// Process the page content here.
 		// If processing is successful, update the last page number in the BadgerDB.
 		for _, result := range resp.Results {
-			method, arguments := utils.ExtractFourByteMethodAndArgumentTypes(result.Text)
+			method, arguments := helpers.ExtractFourByteMethodAndArgumentTypes(result.Text)
 
 			signature := signatures.NewSignature(
 				uint64(result.ID),

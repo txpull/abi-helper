@@ -1,5 +1,5 @@
 // Package utils provides utility functions for common operations.
-package utils
+package helpers
 
 import (
 	"encoding/gob"

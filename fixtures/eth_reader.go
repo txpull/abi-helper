@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/txpull/unpack/utils"
+	"github.com/txpull/unpack/helpers"
 )
 
 // EthReader is a structure that provides methods for discovering Ethereum blocks, transactions, and receipts.
@@ -85,7 +85,7 @@ func (e *EthReader) GetReceiptFromTxHash(txhash common.Hash) (*types.Receipt, bo
 func (e *EthReader) discoverBlocks() error {
 	var blocksRlp [][]byte
 
-	if err := utils.ReadGob(filepath.Join(e.fixturesPath, "blocks.gob"), &blocksRlp); err != nil {
+	if err := helpers.ReadGob(filepath.Join(e.fixturesPath, "blocks.gob"), &blocksRlp); err != nil {
 		return err
 	}
 
@@ -104,7 +104,7 @@ func (e *EthReader) discoverBlocks() error {
 func (e *EthReader) discoverTransactions() error {
 	var txnsRlp map[common.Hash][]byte
 
-	if err := utils.ReadGob(filepath.Join(e.fixturesPath, "transactions.gob"), &txnsRlp); err != nil {
+	if err := helpers.ReadGob(filepath.Join(e.fixturesPath, "transactions.gob"), &txnsRlp); err != nil {
 		return err
 	}
 
@@ -123,7 +123,7 @@ func (e *EthReader) discoverTransactions() error {
 func (e *EthReader) discoverReceipts() error {
 	var receiptsRlp map[common.Hash][]byte
 
-	if err := utils.ReadGob(filepath.Join(e.fixturesPath, "receipts.gob"), &receiptsRlp); err != nil {
+	if err := helpers.ReadGob(filepath.Join(e.fixturesPath, "receipts.gob"), &receiptsRlp); err != nil {
 		return err
 	}
 

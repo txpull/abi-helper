@@ -27,7 +27,7 @@ build/*
 *.go.prototype
 .test.env
 data/bscscan/verified-contracts.gob
-
+data/db
 # Example binaries that should not be included
 examples/contract/contract
 examples/abi/abi

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/txpull/unpack/clients"
-	"github.com/txpull/unpack/utils"
+	"github.com/txpull/unpack/helpers"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -116,7 +116,7 @@ func (e *EthWriter) Write() error {
 		return err
 	}
 
-	if err := utils.WriteGob(blocksPath, e.blocks); err != nil {
+	if err := helpers.WriteGob(blocksPath, e.blocks); err != nil {
 		zap.L().Error(
 			"failed to write RLP encoded blocks",
 			zap.Error(err),
@@ -129,7 +129,7 @@ func (e *EthWriter) Write() error {
 		return err
 	}
 
-	if err := utils.WriteGob(txPath, e.transactions); err != nil {
+	if err := helpers.WriteGob(txPath, e.transactions); err != nil {
 		zap.L().Error(
 			"failed to write RLP encoded block transactions",
 			zap.Error(err),
@@ -142,7 +142,7 @@ func (e *EthWriter) Write() error {
 		return err
 	}
 
-	if err := utils.WriteGob(receiptPath, e.receipts); err != nil {
+	if err := helpers.WriteGob(receiptPath, e.receipts); err != nil {
 		zap.L().Error(
 			"failed to write RLP encoded transaction receipts",
 			zap.Error(err),

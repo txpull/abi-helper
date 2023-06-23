@@ -15,8 +15,8 @@ import (
 	"github.com/txpull/unpack/contract"
 	"github.com/txpull/unpack/db"
 	"github.com/txpull/unpack/fixtures"
+	"github.com/txpull/unpack/helpers"
 	"github.com/txpull/unpack/logger"
-	"github.com/txpull/unpack/utils"
 	"go.uber.org/zap"
 )
 
@@ -47,7 +47,7 @@ func main() {
 	cfgFile := flag.String("config", "../../.unpack.yaml", "Path to the configuration file")
 	flag.Parse()
 
-	if err := utils.InitConfig(*cfgFile); err != nil {
+	if err := helpers.InitConfig(*cfgFile); err != nil {
 		logger.Error("failed to initialize configuration", zap.Error(err))
 		os.Exit(1)
 	}
@@ -107,7 +107,7 @@ func main() {
 				continue
 			}
 
-			if tx.To() == nil && receipt.Status == 1 && receipt.ContractAddress != utils.ZeroAddress {
+			if tx.To() == nil && receipt.Status == 1 && receipt.ContractAddress != helpers.ZeroAddress {
 				// Just to make it more readable
 				zap.L().Info("-----------------------------------")
 

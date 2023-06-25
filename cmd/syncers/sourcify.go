@@ -28,17 +28,18 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	sourcify_go "github.com/txpull/sourcify-go"
 	"github.com/txpull/unpack/clients"
-	"github.com/txpull/unpack/crawlers/fourbyte"
+	"github.com/txpull/unpack/crawlers/sourcify"
 	"github.com/txpull/unpack/db"
 	"github.com/txpull/unpack/db/models"
 	"github.com/txpull/unpack/scanners"
 	"go.uber.org/zap"
 )
 
-var fourbyteCmd = &cobra.Command{
-	Use:   "fourbyte",
-	Short: "Download, process and store signatures from 4byte.directory",
+var sourcifyCmd = &cobra.Command{
+	Use:   "sourcify",
+	Short: "Download, process and store contracts from sourcify.dev",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		rdb, err := clients.NewRedis(
 			clients.RedisWithAddr(viper.GetString("database.redis.addr")),
@@ -49,24 +50,43 @@ var fourbyteCmd = &cobra.Command{
 			return fmt.Errorf("failure to initialize redis client: %s", err)
 		}
 
-		var fourbOpts []fourbyte.WriterOption
+		var sourcifyOpts []sourcify.WriterOption
 
-		provider := scanners.NewFourByteProvider(
-			scanners.WithCtx(cmd.Context()),
-			scanners.WithURL(viper.GetString("syncers.fourbyte.url")), // Replace with your URL
-			scanners.WithMaxRetries(3),
+		provider := sourcify_go.NewClient(
+			sourcify_go.WithBaseURL(viper.GetString("syncers.sourcify.url")),
+			sourcify_go.WithRetryOptions(
+				sourcify_go.WithMaxRetries(viper.GetInt("syncers.sourcify.max_retries")),
+				sourcify_go.WithDelay(viper.GetDuration("syncers.sourcify.retry_dely")*time.Second),
+			),
+			sourcify_go.WithRateLimit(viper.GetInt("syncers.sourcify.rate_limit_s"), 1*time.Second),
 		)
 
-		opts := append(fourbOpts,
-			fourbyte.WithCtx(cmd.Context()),
-			fourbyte.WithProvider(provider),
-			fourbyte.WithRedis(rdb),
-			fourbyte.WithCooldown(100*time.Millisecond),
-			fourbyte.WithChainID(big.NewInt(viper.GetInt64("syncers.fourbyte.chain_id"))),
+		bitquery := scanners.NewBitQueryProvider(
+			viper.GetString("bitquery.api.url"),
+			viper.GetString("bitquery.api.key"),
+		)
+
+		client, err := clients.NewEthClients(
+			viper.GetString("nodes.eth.archive.url"),
+			viper.GetUint16("nodes.eth.archive.concurrent_clients_number"),
+		)
+		if err != nil {
+			return err
+		}
+
+		bscscan := scanners.NewBscScanProvider(viper.GetString("bscscan.api.url"), viper.GetString("bscscan.api.key"))
+
+		opts := append(sourcifyOpts,
+			sourcify.WithCtx(cmd.Context()),
+			sourcify.WithSourcify(provider),
+			sourcify.WithRedis(rdb),
+			sourcify.WithBitQuery(bitquery),
+			sourcify.WithEthClient(client),
+			sourcify.WithBscScan(bscscan),
 		)
 
 		// If ClickHouse is enabled, we are going to write signatures into it
-		if viper.GetBool("syncers.fourbyte.write_to_clickhouse") {
+		if viper.GetBool("syncers.sourcify.write_to_clickhouse") {
 			cdb, err := db.NewClickHouse(
 				db.WithCtx(cmd.Context()),
 				db.WithDebug(false),
@@ -103,16 +123,45 @@ var fourbyteCmd = &cobra.Command{
 				return fmt.Errorf("failure to create (if does not exist) events_mapper table: %s", err)
 			}
 
-			opts = append(opts, fourbyte.WithClickHouseDb(cdb))
+			opts = append(opts, sourcify.WithClickHouseDb(cdb))
 		}
 
-		crawler := fourbyte.NewFourByteWriter(opts...)
+		writer := sourcify.NewSourcifyWriter(opts...)
 
-		if err := crawler.Crawl(); err != nil {
-			return err
+		// This may take a very, very long time to finish as there are bunch of contracts
+		// and it depends on how many you wish to retreive from the sourcify API
+		for _, chainId := range viper.GetStringSlice("syncers.sourcify.chain_ids") {
+			parsedChainId, ok := big.NewInt(0).SetString(chainId, 10)
+			if !ok {
+				return fmt.Errorf("failure to parse chain id: %v", chainId)
+			}
+
+			contracts, err := writer.GetContractListByChainID(parsedChainId)
+			if err != nil {
+				return fmt.Errorf("failure to get contract list by chain: %s", err)
+			}
+
+			zap.L().Info(
+				"Discovered sourcify contracts information",
+				zap.Int("full_contracts", len(contracts.Full)),
+				zap.Int("partial_contracts", len(contracts.Partial)),
+				zap.String("chain_id", chainId),
+			)
+
+			if len(contracts.Full) > 0 {
+				if err := writer.ProcessContractsByType(parsedChainId, contracts, sourcify_go.MethodMatchTypeFull); err != nil {
+					zap.L().Error("Failure to process sourcify full contracts", zap.Error(err))
+				}
+			}
+
+			if len(contracts.Partial) > 0 {
+				if err := writer.ProcessContractsByType(parsedChainId, contracts, sourcify_go.MethodMatchTypePartial); err != nil {
+					zap.L().Error("Failure to process sourcify full contracts", zap.Error(err))
+				}
+			}
+
+			zap.L().Info("Successfully processed sourcify contracts", zap.String("chain_id", chainId))
 		}
-
-		zap.L().Info("Successfully processed 4byte.dictionary signatures")
 
 		return nil
 	},

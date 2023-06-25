@@ -22,13 +22,16 @@ THE SOFTWARE.
 package syncers_cmd
 
 import (
+	"fmt"
 	"os"
 	"path"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/txpull/unpack/clients"
 	bscscan_crawler "github.com/txpull/unpack/crawlers/bscscan"
 	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/db/models"
 	"github.com/txpull/unpack/scanners"
 	"go.uber.org/zap"
 )
@@ -37,7 +40,7 @@ var bscscanCmd = &cobra.Command{
 	Use:   "bscscan",
 	Short: "Process verified contracts from bscscan",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bscscanPath := viper.GetString("bsc.crawler.bscscan_path")
+		bscscanPath := viper.GetString("syncers.bscscan.verified_contracts_path")
 
 		if bscscanPath == "" {
 			currentDir, err := os.Getwd()
@@ -49,43 +52,91 @@ var bscscanCmd = &cobra.Command{
 
 		bscscanVerifiedCsvPath := path.Join(bscscanPath, "verified-contracts.csv")
 
-		databasePath := viper.GetString("database.badger.path")
-
-		if databasePath == "" {
-			currentDir, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-			databasePath = path.Join(currentDir, "data", "db")
-		}
-
 		zap.L().Info(
 			"Starting to process bsc scan verified contracts...",
 			zap.String("bscscan-path", bscscanPath),
 			zap.String("bscscan-csv-path", bscscanVerifiedCsvPath),
-			zap.String("database-path", databasePath),
 		)
 
-		// Open the Badger database located in the databasePath directory.
-		// It will be created if it doesn't exist.
-		bdb, err := db.NewBadgerDB(db.WithDbPath(databasePath))
+		rdb, err := clients.NewRedis(
+			clients.RedisWithAddr(viper.GetString("database.redis.addr")),
+			clients.RedisWithPassword(viper.GetString("database.redis.password")),
+			clients.RedisWithDB(viper.GetInt("database.redis.db")),
+		)
 		if err != nil {
-			return err
+			return fmt.Errorf("failure to initialize redis client: %s", err)
 		}
-		defer bdb.Close()
-		go bdb.GarbageCollect()
 
 		// NewBscScanProvider creates a new instance of BscScanProvider with the provided API key and API URL.
 		scanner := scanners.NewBscScanProvider(viper.GetString("bscscan.api.url"), viper.GetString("bscscan.api.key"))
 
-		crawler := bscscan_crawler.NewVerifiedContractsWritter(
-			cmd.Context(),
+		client, err := clients.NewEthClients(
+			viper.GetString("nodes.eth.archive.url"),
+			viper.GetUint16("nodes.eth.archive.concurrent_clients_number"),
+		)
+		if err != nil {
+			return err
+		}
+
+		chainId, err := client.GetNetworkID(cmd.Context())
+		if err != nil {
+			return fmt.Errorf("failure to get network id: %s", err)
+		}
+
+		opts := []bscscan_crawler.Option{
 			bscscan_crawler.WithRequestLimit(8),
 			bscscan_crawler.WithDataPath(bscscanVerifiedCsvPath),
 			bscscan_crawler.WithMaxRetry(5),
 			bscscan_crawler.WithBackoffFactor(2),
 			bscscan_crawler.WithScanner(scanner),
-			bscscan_crawler.WithBadgerDb(bdb),
+			bscscan_crawler.WithRedis(rdb),
+			bscscan_crawler.WithEthClient(client),
+			bscscan_crawler.WithChainID(chainId),
+		}
+
+		if viper.GetBool("syncers.bscscan.write_to_clickhouse") {
+			cdb, err := db.NewClickHouse(
+				db.WithCtx(cmd.Context()),
+				db.WithDebug(false),
+				db.WithHost(viper.GetString("database.clickhouse.host")),
+				db.WithDatabase(viper.GetString("database.clickhouse.database")),
+				db.WithUsername(viper.GetString("database.clickhouse.username")),
+				db.WithPassword(viper.GetString("database.clickhouse.password")),
+			)
+			if err != nil {
+				return err
+			}
+
+			if err := db.ExecClickHouseQuery(cmd.Context(), cdb, "SET allow_experimental_object_type = ?;", "1"); err != nil {
+				return fmt.Errorf("failure to set allow_experimental_object_type: %s", err)
+			}
+
+			if err := models.CreateContractsTable(cmd.Context(), cdb); err != nil {
+				return fmt.Errorf("failure to create (if does not exist) contracts table: %s", err)
+			}
+
+			if err := models.CreateMethodsTable(cmd.Context(), cdb); err != nil {
+				return fmt.Errorf("failure to create (if does not exist) methods table: %s", err)
+			}
+
+			if err := models.CreateMethodMapperTable(cmd.Context(), cdb); err != nil {
+				return fmt.Errorf("failure to create (if does not exist) methods_mapper table: %s", err)
+			}
+
+			if err := models.CreateEventsTable(cmd.Context(), cdb); err != nil {
+				return fmt.Errorf("failure to create (if does not exist) events table: %s", err)
+			}
+
+			if err := models.CreateEventMapperTable(cmd.Context(), cdb); err != nil {
+				return fmt.Errorf("failure to create (if does not exist) events_mapper table: %s", err)
+			}
+
+			opts = append(opts, bscscan_crawler.WithClickHouseDb(cdb))
+		}
+
+		crawler := bscscan_crawler.NewVerifiedContractsWritter(
+			cmd.Context(),
+			opts...,
 		)
 
 		contracts, err := crawler.GatherVerifiedContracts()

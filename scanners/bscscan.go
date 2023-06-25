@@ -12,6 +12,34 @@ import (
 // Default BscScan API URL
 const BSCSCAN_API_URL = "https://api.bscscan.com/api"
 
+type BscScanContract struct {
+	SourceCode           string `json:"SourceCode"`
+	ABI                  string `json:"ABI"`
+	Name                 string `json:"ContractName"`
+	CompilerVersion      string `json:"CompilerVersion"`
+	OptimizationUsed     string `json:"OptimizationUsed"`
+	Runs                 string `json:"Runs"`
+	ConstructorArguments string `json:"ConstructorArguments"`
+	EVMVersion           string `json:"EVMVersion"`
+	Library              string `json:"Library"`
+	LicenseType          string `json:"LicenseType"`
+	Proxy                string `json:"Proxy"`
+	Implementation       string `json:"Implementation"`
+	SwarmSource          string `json:"SwarmSource"`
+}
+
+type BscScanResponse struct {
+	Status  string            `json:"status"`
+	Message string            `json:"message"`
+	Result  []BscScanContract `json:"result"`
+}
+
+type BscScanErrorResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Result  string `json:"result"`
+}
+
 // BscScanProvider represents the BscScan scanner provider.
 type BscScanProvider struct {
 	url    string
@@ -19,7 +47,7 @@ type BscScanProvider struct {
 }
 
 // ScanContract scans the contract using the BscScan provider.
-func (p *BscScanProvider) ScanContract(contractAddress string) (*Result, error) {
+func (p *BscScanProvider) ScanContract(contractAddress string) (*BscScanContract, error) {
 	// Construct the BscScan API URL
 	url := fmt.Sprintf("%s?module=contract&action=getsourcecode&address=%s&apikey=%s", p.url, contractAddress, p.apiKey)
 

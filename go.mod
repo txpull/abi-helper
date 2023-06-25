@@ -6,11 +6,16 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.10.1
 	github.com/dgraph-io/badger/v4 v4.1.0
 	github.com/ethereum/go-ethereum v1.12.0
+	github.com/google/uuid v1.3.0
+	github.com/redis/go-redis/v9 v9.0.5
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
+	github.com/txpull/sourcify-go v1.0.1
 	go.uber.org/zap v1.24.0
 )
+
+replace github.com/txpull/sourcify-go => ../sourcify-go
 
 require (
 	github.com/ClickHouse/ch-go v0.52.1 // indirect
@@ -22,6 +27,7 @@ require (
 	github.com/deckarep/golang-set/v2 v2.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
@@ -34,7 +40,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/holiman/uint256 v1.2.2-0.20230321075855-87b91420868c // indirect

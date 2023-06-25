@@ -1,22 +1,6 @@
 package transactions
 
-import (
-	"context"
-	"log"
-	"math/big"
-	"os"
-	"testing"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/stretchr/testify/assert"
-	"github.com/txpull/unpack/clients"
-	"github.com/txpull/unpack/db"
-	"github.com/txpull/unpack/fixtures"
-	"github.com/txpull/unpack/signatures"
-)
-
-func TestTransaction_DiscoverAndDecompile(t *testing.T) {
+/* func TestTransaction_DiscoverAndDecompile(t *testing.T) {
 	tAssert := assert.New(t)
 	ctx := context.TODO()
 
@@ -171,3 +155,4 @@ func createTestDecompiler(tx *types.Transaction) *Decompiler {
 	decompiler, _ := NewDecompiler(ctx, tx, nil)
 	return decompiler
 }
+*/

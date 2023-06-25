@@ -1,6 +1,6 @@
 // Package contract provides a customizable ContractDecoder
 // which uses the Option pattern to set configurations.
-package contract
+package contracts
 
 import (
 	"context"

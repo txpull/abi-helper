@@ -1,4 +1,4 @@
-package contract
+package contracts
 
 import (
 	"math/big"

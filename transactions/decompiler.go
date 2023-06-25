@@ -2,13 +2,10 @@ package transactions
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethereum_types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/txpull/unpack/opcodes"
-	"github.com/txpull/unpack/signatures"
-	"go.uber.org/zap"
+	"github.com/txpull/unpack/types"
 )
 
 type MethodArgument struct {
@@ -21,26 +18,26 @@ type MethodArgument struct {
 // Decompiler decompiles Ethereum compatible transactions into EVM opcode instructions.
 type Decompiler struct {
 	ctx        context.Context
-	tx         *types.Transaction
+	tx         *ethereum_types.Transaction
 	decompiler *opcodes.Decompiler
-	signatures *signatures.SignaturesReader
+	method     *types.Method
 }
 
 // NewDecompiler creates a new instance of the Decompiler struct.
 // It takes a context and a types.Transaction object as input parameters.
 // It returns a pointer to the created Decompiler object and an error.
-func NewDecompiler(ctx context.Context, tx *types.Transaction, s *signatures.SignaturesReader) (*Decompiler, error) {
+func NewDecompiler(ctx context.Context, tx *ethereum_types.Transaction, m *types.Method) (*Decompiler, error) {
 	opcode := opcodes.NewDecompiler(ctx, tx.Data())
 
 	return &Decompiler{
 		ctx:        ctx,
 		tx:         tx,
 		decompiler: opcode,
-		signatures: s,
+		method:     m,
 	}, nil
 }
 
-// GetMethodIdBytes returns the method ID bytes extracted from the transaction data.
+/* // GetMethodIdBytes returns the method ID bytes extracted from the transaction data.
 // If the transaction data is empty, it returns an empty byte slice.
 // Otherwise, it returns the first 4 bytes of the transaction data, which represent the method ID.
 func (d *Decompiler) GetMethodIdBytes() []byte {
@@ -181,3 +178,4 @@ func (d *Decompiler) GetInstructions() []opcodes.Instruction {
 func (d *Decompiler) GetOptDecompiler() *opcodes.Decompiler {
 	return d.decompiler
 }
+*/

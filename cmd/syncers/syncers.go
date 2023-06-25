@@ -35,4 +35,5 @@ func Init(rootCmd *cobra.Command) {
 	rootCmd.AddCommand(syncerCmd)
 	syncerCmd.AddCommand(bscscanCmd)
 	syncerCmd.AddCommand(fourbyteCmd)
+	syncerCmd.AddCommand(sourcifyCmd)
 }

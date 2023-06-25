@@ -62,13 +62,13 @@ func WithMaxRetries(maxRetries int) Option {
 	}
 }
 
-// WithContext is an Option to set the context of the FourByteProvider.
+// WithCtx is an Option to set the context of the FourByteProvider.
 //
 // Example usage:
 //
 //	ctx := context.Background()
-//	provider := NewFourByteProvider(WithContext(ctx))
-func WithContext(ctx context.Context) Option {
+//	provider := NewFourByteProvider(WithCtx(ctx))
+func WithCtx(ctx context.Context) Option {
 	return func(p *FourByteProvider) {
 		p.ctx = ctx
 	}

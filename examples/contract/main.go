@@ -12,7 +12,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/txpull/unpack/clients"
-	"github.com/txpull/unpack/contract"
+	"github.com/txpull/unpack/contracts"
 	"github.com/txpull/unpack/db"
 	"github.com/txpull/unpack/fixtures"
 	"github.com/txpull/unpack/helpers"
@@ -92,10 +92,10 @@ func main() {
 
 	// END INITIALIZATION OF THE PREREQUISITES
 
-	decoder := contract.NewContractDecoder(
-		contract.WithContext(ctx),
-		contract.WithEthClient(client),
-		contract.WithDB(bdb),
+	decoder := contracts.NewContractDecoder(
+		contracts.WithContext(ctx),
+		contracts.WithEthClient(client),
+		contracts.WithDB(bdb),
 	)
 
 	for _, block := range fixturesReader.GetBlocks() {

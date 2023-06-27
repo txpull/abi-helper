@@ -82,20 +82,4 @@ var generateEthCmd = &cobra.Command{
 
 func init() {
 	fixturesCmd.AddCommand(generateEthCmd)
-
-	generateEthCmd.PersistentFlags().StringP("eth.node.url", "u", "", "Ethereum based node full url (example: https://node-url:port)")
-	generateEthCmd.MarkFlagRequired("eth.node.url")
-	viper.BindPFlag("eth.node.url", generateEthCmd.PersistentFlags().Lookup("eth.node.url"))
-
-	generateEthCmd.PersistentFlags().Uint16P("eth.node.concurrent_clients_number", "c", 1, "How many concurrent node clients to spawn")
-	generateEthCmd.MarkFlagRequired("eth.node.concurrent_clients_number")
-	viper.BindPFlag("eth.node.concurrent_clients_number", generateEthCmd.PersistentFlags().Lookup("eth.node.concurrent_clients_number"))
-
-	generateEthCmd.PersistentFlags().Uint64P("eth.generator.start_block_number", "s", 0, "How many concurrent node clients to spawn")
-	generateEthCmd.MarkFlagRequired("eth.generator.start_block_numberr")
-	viper.BindPFlag("eth.generator.start_block_number", generateEthCmd.PersistentFlags().Lookup("eth.generator.start_block_number"))
-
-	generateEthCmd.PersistentFlags().Uint64P("eth.generator.end_block_number", "e", 0, "How many concurrent node clients to spawn")
-	generateEthCmd.MarkFlagRequired("eth.generator.end_block_numberr")
-	viper.BindPFlag("eth.generator.end_block_number", generateEthCmd.PersistentFlags().Lookup("eth.generator.end_block_number"))
 }

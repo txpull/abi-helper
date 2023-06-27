@@ -44,7 +44,11 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("failure to construct logger: %s", err))
 	}
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			panic(fmt.Errorf("failure to sync logger: %s", err))
+		}
+	}()
 
 	// Basically what we want to achieve is ue zap.L() throughout project without
 	// passing by reference logger everywhere.

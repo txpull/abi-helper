@@ -182,7 +182,7 @@ func (w *SourcifyWriter) ProcessContractsByType(chainID *big.Int, contracts *sou
 		}
 
 		// Search for source code...
-		for entryPointTarget, _ := range metadata.Settings.CompilationTarget {
+		for entryPointTarget := range metadata.Settings.CompilationTarget {
 			if metadata.Sources != nil && len(metadata.Sources) > 0 {
 				for _, source := range sources.Code {
 					if strings.Contains(source.Path, entryPointTarget) {

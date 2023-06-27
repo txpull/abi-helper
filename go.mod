@@ -11,11 +11,11 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
-	github.com/txpull/sourcify-go v1.0.1
+	github.com/txpull/sourcify-go v1.0.2
 	go.uber.org/zap v1.24.0
 )
 
-replace github.com/txpull/sourcify-go => ../sourcify-go
+// replace github.com/txpull/sourcify-go => ../sourcify-go
 
 require (
 	github.com/ClickHouse/ch-go v0.52.1 // indirect

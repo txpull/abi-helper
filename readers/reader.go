@@ -10,4 +10,7 @@ import (
 
 type Reader interface {
 	GetContractByAddress(chainId *big.Int, address common.Address) (*types.Contract, error)
+
+	// String returns the name of the Reader.
+	String() string
 }

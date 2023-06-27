@@ -49,8 +49,8 @@ func (c *EthClient) Close() {
 	}
 }
 
-// NewEthClients creates a new load-balanced EthClient instance with multiple Ethereum clients.
-func NewEthClients(url string, concurrentClients uint16) (*EthClient, error) {
+// NewEthClient creates a new load-balanced EthClient instance with multiple Ethereum clients.
+func NewEthClient(url string, concurrentClients uint16) (*EthClient, error) {
 	if url == "" {
 		return nil, ErrClientURLNotSet
 	}

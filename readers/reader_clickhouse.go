@@ -25,3 +25,7 @@ func NewClickHouseReader(ctx context.Context, client *db.ClickHouse) (Reader, er
 func (r *ClickHouseReader) GetContractByAddress(chainId *big.Int, address common.Address) (*types.Contract, error) {
 	return models.GetContract(r.ctx, r.client, chainId, address)
 }
+
+func (r *ClickHouseReader) String() string {
+	return "clickhouse"
+}

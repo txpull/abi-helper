@@ -23,6 +23,38 @@ const (
 	ContractVerificationTypeBscscan
 )
 
+func VerificationType(verificationType int16) ContractVerificationType {
+	switch verificationType {
+	case 1:
+		return ContractVerificationTypeSourcify
+	case 2:
+		return ContractVerificationTypeEtherscan
+	case 3:
+		return ContractVerificationTypeBscscan
+	default:
+		return ContractVerificationTypeNone
+	}
+}
+
+type ContractLanguage string
+
+const (
+	ContractLanguageSolidity ContractLanguage = "solidity"
+	ContractLanguageVyper    ContractLanguage = "vyper"
+)
+
+func ToContractLanguage(language string) ContractLanguage {
+	language = strings.ToLower(language)
+	switch language {
+	case "solidity":
+		return ContractLanguageSolidity
+	case "vyper":
+		return ContractLanguageVyper
+	default:
+		return ContractLanguageSolidity
+	}
+}
+
 type Contract struct {
 	UUID uuid.UUID `json:"uuid"`
 
@@ -38,11 +70,13 @@ type Contract struct {
 	TransactionHash common.Hash `json:"transaction_hash"`
 
 	Name                 string                   `json:"name"`
-	Language             string                   `json:"language"`
+	Language             ContractLanguage         `json:"language"`
 	CompilerVersion      string                   `json:"compiler_version"`
 	OptimizationUsed     string                   `json:"optimization_used"`
 	Runs                 string                   `json:"runs"`
 	ConstructorArguments string                   `json:"constructor_arguments"`
+	RuntimeBytecode      []byte                   `json:"runtime_bytecode"`
+	Bytecode             []byte                   `json:"bytecode"`
 	EVMVersion           string                   `json:"evm_version"`
 	Library              string                   `json:"library"`
 	LicenseType          string                   `json:"license_type"`
@@ -54,6 +88,7 @@ type Contract struct {
 	SourceUrls           []string                 `json:"source_urls"`
 	VerificationType     ContractVerificationType `json:"verification_type"`
 	VerificationStatus   string                   `json:"verification_status"`
+	ProcessStatus        int8                     `json:"process_status"`
 }
 
 func (r *Contract) MarshalBytes() ([]byte, error) {
@@ -93,7 +128,7 @@ func NewContractFromSourcify(chainId *big.Int, address common.Address, metadata 
 		UUID:             uuid.New(),
 		ChainID:          chainId,
 		Address:          address,
-		Language:         strings.ToLower(metadata.Language),
+		Language:         ToContractLanguage(metadata.Language),
 		CompilerVersion:  metadata.Compiler.Version,
 		OptimizationUsed: strconv.FormatBool(metadata.Settings.Optimizer.Enabled),
 		Runs:             strconv.Itoa(metadata.Settings.Optimizer.Runs),

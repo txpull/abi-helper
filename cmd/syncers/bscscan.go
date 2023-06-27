@@ -70,7 +70,7 @@ var bscscanCmd = &cobra.Command{
 		// NewBscScanProvider creates a new instance of BscScanProvider with the provided API key and API URL.
 		scanner := scanners.NewBscScanProvider(viper.GetString("bscscan.api.url"), viper.GetString("bscscan.api.key"))
 
-		client, err := clients.NewEthClients(
+		client, err := clients.NewEthClient(
 			viper.GetString("nodes.eth.archive.url"),
 			viper.GetUint16("nodes.eth.archive.concurrent_clients_number"),
 		)

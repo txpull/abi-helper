@@ -11,6 +11,10 @@ import (
 type Reader interface {
 	GetContractByAddress(chainId *big.Int, address common.Address) (*types.Contract, error)
 
+	GetMethodBySignature(chainId *big.Int, signature string) (*types.Method, error)
+
+	GetEventByHash(chainId *big.Int, hash common.Hash) (*types.Event, error)
+
 	// String returns the name of the Reader.
 	String() string
 }

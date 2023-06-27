@@ -15,6 +15,16 @@ func (r *MockReader) GetContractByAddress(chainId *big.Int, address common.Addre
 	return nil, nil
 }
 
+func (r *MockReader) GetMethodBySignature(chainId *big.Int, signature string) (*types.Method, error) {
+	// Mock implementation
+	return nil, nil
+}
+
+func (r *MockReader) GetEventByHash(chainId *big.Int, hash common.Hash) (*types.Event, error) {
+	// Mock implementation
+	return nil, nil
+}
+
 func (r *MockReader) String() string {
 	return "mock"
 }

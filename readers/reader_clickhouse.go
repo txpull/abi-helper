@@ -26,6 +26,14 @@ func (r *ClickHouseReader) GetContractByAddress(chainId *big.Int, address common
 	return models.GetContract(r.ctx, r.client, chainId, address)
 }
 
+func (r *ClickHouseReader) GetMethodBySignature(chainId *big.Int, signature string) (*types.Method, error) {
+	return models.GetMethod(r.ctx, r.client, signature)
+}
+
+func (r *ClickHouseReader) GetEventByHash(chainId *big.Int, hash common.Hash) (*types.Event, error) {
+	return models.GetEvent(r.ctx, r.client, chainId, hash)
+}
+
 func (r *ClickHouseReader) String() string {
 	return "clickhouse"
 }

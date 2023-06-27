@@ -57,7 +57,8 @@ func TestGenericUnpacker(t *testing.T) {
 	tAssert.NotNil(manager, "readers manager is nil")
 
 	// Set the priority reader at this point to be Redis.
-	manager.SetPriorityReader("clickhouse")
+	err = manager.SetPriorityReader("clickhouse")
+	tAssert.NoError(err, "failure to set priority reader")
 
 	// We are going to use actual real network to fetch necessary information to complete test.
 	// You can find free rpc urls at:

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestManager_GetReaders(t *testing.T) {
@@ -103,7 +105,9 @@ func TestManager_GetSortedReaders(t *testing.T) {
 	manager.AddReader("reader1", reader1)
 	manager.AddReader("reader2", reader2)
 	manager.AddReader("reader3", reader3)
-	manager.SetPriorityReader("reader2")
+
+	err := manager.SetPriorityReader("reader2")
+	assert.Error(t, err)
 
 	sortedReaders := manager.GetSortedReaders()
 	if len(sortedReaders) != 3 {

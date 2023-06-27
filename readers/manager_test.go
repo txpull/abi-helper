@@ -107,7 +107,7 @@ func TestManager_GetSortedReaders(t *testing.T) {
 	manager.AddReader("reader3", reader3)
 
 	err := manager.SetPriorityReader("reader2")
-	assert.Error(t, err)
+	assert.NoError(t, err)
 
 	sortedReaders := manager.GetSortedReaders()
 	if len(sortedReaders) != 3 {

@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
@@ -63,6 +64,39 @@ func InsertEvent(ctx context.Context, client *db.ClickHouse, method *types.Event
 	}
 
 	return nil
+}
+
+func GetEvent(ctx context.Context, client *db.ClickHouse, chainId *big.Int, hash common.Hash) (*types.Event, error) {
+	query := `
+		SELECT
+			uuid,
+			name,
+			raw_name,
+			signature,
+			hash,
+			is_anonymous,
+			is_partial,
+			arguments
+		FROM events
+		WHERE hash = ?
+		LIMIT 1
+	`
+
+	var method types.Event
+	if err := client.DB().QueryRow(ctx, query, hash.Hex()).Scan(
+		&method.UUID,
+		&method.Name,
+		&method.RawName,
+		&method.Signature,
+		&method.Hash,
+		&method.IsAnonymous,
+		&method.IsPartial,
+		&method.Arguments,
+	); err != nil {
+		return nil, err
+	}
+
+	return &method, nil
 }
 
 func DeleteEventById(ctx context.Context, client *db.ClickHouse, id *uuid.UUID) error {

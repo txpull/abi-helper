@@ -80,6 +80,48 @@ func InsertMethod(ctx context.Context, client *db.ClickHouse, method *types.Meth
 	return nil
 }
 
+func GetMethod(ctx context.Context, client *db.ClickHouse, signature string) (*types.Method, error) {
+	query := `
+		SELECT
+			uuid,
+			name,
+			raw_name,
+			signature,
+			hex,
+			bytes,
+			is_constant,
+			is_payable,
+			is_partial,
+			arguments,
+			returns,
+			state_mutability,
+			type
+		FROM methods
+		WHERE signature = ?
+	`
+
+	var method types.Method
+	if err := client.DB().QueryRow(ctx, query, signature).Scan(
+		&method.UUID,
+		&method.Name,
+		&method.RawName,
+		&method.Signature,
+		&method.Hex,
+		&method.Bytes,
+		&method.IsConstant,
+		&method.IsPayable,
+		&method.IsPartial,
+		&method.Arguments,
+		&method.Returns,
+		&method.StateMutability,
+		&method.Type,
+	); err != nil {
+		return nil, err
+	}
+
+	return &method, nil
+}
+
 func MethodExists(ctx context.Context, client *db.ClickHouse, method *types.Method) (bool, error) {
 	query := `SELECT COUNT(*) FROM methods WHERE hex = ?`
 

@@ -174,7 +174,7 @@ func NewEthWriter(ctx context.Context, config EthWriterConfig) (*EthWriter, erro
 		receipts:     make(map[common.Hash][]byte),
 	}
 
-	clients, err := clients.NewEthClients(config.ClientURL, config.ConcurrentClientsNumber)
+	clients, err := clients.NewEthClient(config.ClientURL, config.ConcurrentClientsNumber)
 	if err != nil {
 		return nil, err
 	}

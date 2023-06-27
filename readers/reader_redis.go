@@ -35,3 +35,7 @@ func (r *RedisReader) GetContractByAddress(chainId *big.Int, address common.Addr
 
 	return contract, nil
 }
+
+func (r *RedisReader) String() string {
+	return "redis"
+}

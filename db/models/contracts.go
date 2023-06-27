@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
@@ -10,9 +11,6 @@ import (
 	"github.com/txpull/unpack/types"
 )
 
-// CreateContractsTable creates a new table for contracts in the database if it doesn't already exist.
-// It takes a context and a database client as arguments.
-// It returns an error if the execution of the query fails.
 func CreateContractsTable(ctx context.Context, client *db.ClickHouse) error {
 	query := `
 		CREATE TABLE IF NOT EXISTS contracts (
@@ -50,9 +48,6 @@ func CreateContractsTable(ctx context.Context, client *db.ClickHouse) error {
 	return nil
 }
 
-// InsertContract inserts a new contract into the contracts table.
-// It takes a context, a database client, and a contract as arguments.
-// It returns an error if the execution of the query fails.
 func InsertContract(ctx context.Context, client *db.ClickHouse, contract *types.Contract) error {
 	query := `
 		INSERT INTO contracts (
@@ -114,30 +109,80 @@ func InsertContract(ctx context.Context, client *db.ClickHouse, contract *types.
 	return nil
 }
 
-// DeleteContractById deletes a contract from the contracts table by its UUID.
-// It takes a context, a database client, and a UUID as arguments.
-// It returns an error if the execution of the query fails.
-func DeleteContractById(ctx context.Context, client *db.ClickHouse, id *uuid.UUID) error {
-	query := `DELETE FROM contracts WHERE uuid = ?`
+func GetContract(ctx context.Context, client *db.ClickHouse, chainId *big.Int, addr common.Address) (*types.Contract, error) {
+	query := `
+		SELECT 
+			uuid,
+			chain_id,
+			block_hash,
+			transaction_hash,
+			contract_address,
+			name,
+			language,
+			compiler_version,
+			optimization_used,
+			runs,
+			constructor_arguments,
+			evm_version,
+			library,
+			license_type,
+			proxy,
+			source_code,
+			constructor_abi,
+			abi,
+			metadata,
+			source_urls,
+			verification_type,
+			verification_status,
+			process_status
+		FROM contracts WHERE contract_address = ? AND chain_id = ?
+	`
 
-	if err := client.DB().Exec(ctx, query, id.String()); err != nil {
-		return err
+	row := client.DB().QueryRow(ctx, query, addr.Hex(), chainId.Int64())
+
+	contract := &types.Contract{}
+
+	var rawChainId int64
+	var blockHash, transactionHash, address, language string
+	var verificationType int16
+
+	err := row.Scan(
+		&contract.UUID,
+		&rawChainId,
+		&blockHash,
+		&transactionHash,
+		&address,
+		&contract.Name,
+		&language,
+		&contract.CompilerVersion,
+		&contract.OptimizationUsed,
+		&contract.Runs,
+		&contract.ConstructorArguments,
+		&contract.EVMVersion,
+		&contract.Library,
+		&contract.LicenseType,
+		&contract.Proxy,
+		&contract.SourceCode,
+		&contract.ConstructorABI,
+		&contract.ABI,
+		&contract.MetaData,
+		&contract.SourceUrls,
+		&verificationType,
+		&contract.VerificationStatus,
+		&contract.ProcessStatus,
+	)
+
+	contract.ChainID = big.NewInt(rawChainId)
+	contract.BlockHash = common.HexToHash(blockHash)
+	contract.TransactionHash = common.HexToHash(transactionHash)
+	contract.Address = common.HexToAddress(address)
+	contract.VerificationType = types.VerificationType(verificationType)
+
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
-}
-
-// DeleteContractByAddress deletes a contract from the contracts table by its contract address.
-// It takes a context, a database client, and a contract address as arguments.
-// It returns an error if the execution of the query fails.
-func DeleteContractByAddress(ctx context.Context, client *db.ClickHouse, addr *common.Address) error {
-	query := `DELETE FROM contracts WHERE contract_address = ?`
-
-	if err := client.DB().Exec(ctx, query, addr.Hex()); err != nil {
-		return err
-	}
-
-	return nil
+	return contract, nil
 }
 
 func ContractExists(ctx context.Context, client *db.ClickHouse, address common.Address) (bool, error) {
@@ -149,4 +194,24 @@ func ContractExists(ctx context.Context, client *db.ClickHouse, address common.A
 	}
 
 	return count > 0, nil
+}
+
+func DeleteContractById(ctx context.Context, client *db.ClickHouse, id *uuid.UUID) error {
+	query := `DELETE FROM contracts WHERE uuid = ?`
+
+	if err := client.DB().Exec(ctx, query, id.String()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteContractByAddress(ctx context.Context, client *db.ClickHouse, addr *common.Address) error {
+	query := `DELETE FROM contracts WHERE contract_address = ?`
+
+	if err := client.DB().Exec(ctx, query, addr.Hex()); err != nil {
+		return err
+	}
+
+	return nil
 }

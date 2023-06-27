@@ -361,12 +361,12 @@ func (bs *BscscanWriter) tryScanContract(ctx context.Context, c CsvContract) err
 					}
 					return "false"
 				}(),
-				Language: func() string {
+				Language: func() types.ContractLanguage {
 					if strings.Contains(contractResult.CompilerVersion, "vyper") {
-						return "vyper"
+						return types.ContractLanguageVyper
 					}
 
-					return "solidity"
+					return types.ContractLanguageSolidity
 				}(),
 				Runs:        contractResult.Runs,
 				EVMVersion:  strings.ToLower(contractResult.EVMVersion),

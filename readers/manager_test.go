@@ -3,13 +3,8 @@ package readers
 import (
 	"context"
 	"errors"
-	"math/big"
 	"testing"
-
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/txpull/unpack/types"
 )
-
 
 func TestManager_GetReaders(t *testing.T) {
 	ctx := context.TODO()

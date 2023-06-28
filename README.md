@@ -13,6 +13,6 @@ I am on a weekly basis implementing different aspects, rearranging existing pack
 
 The initial release will be a command line tool that will allow you to decode contracts, transactions, methods and logs. 
 
-Any additional functionalities will be added in the future releases. Reason is so we can keep sanity of development and that base release, that is foundation to everything is rock solid.
+Any additional functionalities will be added in the future releases. Reason is so we can keep sanity of development. Foundation of unpack project is essential and it has to be is rock solid prior we continue with new functionalities.
 
 This means that static analysis of contracts, transactions, etc... that are not known to us in the database won't be available in the initial release.

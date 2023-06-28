@@ -68,7 +68,7 @@ var sourcifyCmd = &cobra.Command{
 			return err
 		}
 
-		bscscan := scanners.NewBscScanProvider(viper.GetString("bscscan.api.url"), viper.GetString("bscscan.api.key"))
+		bscscan := scanners.NewBscScanProvider(cmd.Context(), options.G().Clients.Bscscan)
 
 		opts := append(sourcifyOpts,
 			sourcify.WithCtx(cmd.Context()),

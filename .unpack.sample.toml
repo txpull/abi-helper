@@ -69,7 +69,6 @@ key = ""
 
 # This is the root section for configuring the database.
 [database]
-
 # This section is dedicated to the configuration of the Redis database.
 [database.redis]
 # This is the address for the Redis database.
@@ -87,16 +86,24 @@ max_backoff_ms = 512
 
 # This section is dedicated to the configuration of the Clickhouse database.
 [database.clickhouse]
-# This is the host for the Clickhouse database. 
-host = ":9440"
+# This is the hosts for the Clickhouse database. 
+hosts = [":9440"]
 # This is the name of the database in the Clickhouse server.
 database = ""
 # This is the username for the Clickhouse database. It should be filled with the appropriate username.
 username = ""
 # This is the password for the Clickhouse database. It should be filled with the appropriate password.
 password = ""
-# This is the path to the certificate file for the Clickhouse database. It should be filled with the appropriate path.
-certificate_path = "/home/{user}/.unpack/clickhouse-client.pem"
+# This is the maximum execution time it can take for the clickhouse database to return response.
+max_execution_time = 60
+# Dial timeout after which if connection is not established, it will be considered as failed.
+dial_timeout = 30
+# Maximum number of opened connections to the clickhouse database server.
+max_open_conns = 10
+# Maximum number of idle connections to the clickhouse database server.
+max_idle_conns = 5
+# Maximum lifetime of a connection to the clickhouse database server in minutes.
+max_conn_lifetime_m = 60
 
 # This is the root section for configuring syncers.
 [syncers]

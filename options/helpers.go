@@ -66,3 +66,37 @@ func New(optFile string) (*Options, error) {
 
 	return &globalOptions, nil
 }
+
+func NewFromEnv(optFile string) (*Options, error) {
+	if optFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(optFile)
+	} else {
+		// Find home directory.
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+
+		// Make sure that default options directory is /home/{user}/.unpack/
+		home = filepath.Join(home, ".unpack")
+		viper.AddConfigPath(home)
+
+		// Search config in home directory with name "unpack" (with .toml extension).
+		viper.SetConfigType("toml")
+		viper.SetConfigName("unpack")
+	}
+
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, err
+	}
+
+	// Unmarshal options into globally accessible struct
+	err := viper.Unmarshal(&globalOptions)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode options into struct: %v", err)
+	}
+
+	return &globalOptions, nil
+}

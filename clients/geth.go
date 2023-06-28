@@ -22,7 +22,7 @@ var (
 type EthClient struct {
 	ctx     context.Context
 	opts    options.Node
-	clients []*ethclient.Client
+	clients map[uint64][]*ethclient.Client
 	next    uint32
 }
 
@@ -32,8 +32,8 @@ func (c *EthClient) Len() int {
 }
 
 // GetNetworkID retrieves the network ID from one of the underlying Ethereum clients.
-func (c *EthClient) GetNetworkID(ctx context.Context) (*big.Int, error) {
-	toReturn, err := c.GetClient().NetworkID(ctx)
+func (c *EthClient) GetNetworkID(ctx context.Context, chainId *big.Int) (*big.Int, error) {
+	toReturn, err := c.GetClient(chainId).NetworkID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,15 +41,17 @@ func (c *EthClient) GetNetworkID(ctx context.Context) (*big.Int, error) {
 }
 
 // GetClient returns the next Ethereum client in a round-robin fashion.
-func (c *EthClient) GetClient() *ethclient.Client {
+func (c *EthClient) GetClient(chainId *big.Int) *ethclient.Client {
 	n := atomic.AddUint32(&c.next, 1)
-	return c.clients[(int(n)-1)%len(c.clients)]
+	return c.clients[chainId.Uint64()][(int(n)-1)%len(c.clients)]
 }
 
 // Close closes all the underlying Ethereum clients.
 func (c *EthClient) Close() {
-	for _, client := range c.clients {
-		client.Close()
+	for _, clients := range c.clients {
+		for _, client := range clients {
+			client.Close()
+		}
 	}
 }
 
@@ -73,7 +75,7 @@ func (c *EthClient) ValidateOptions() error {
 // If any error occurs during the dialing of the Ethereum clients, it is returned.
 func NewEthClient(ctx context.Context, opts options.Node) (*EthClient, error) {
 	var wg sync.WaitGroup
-	clients := make([]*ethclient.Client, 0, opts.ConcurrentClientsNumber)
+	clients := map[uint64][]*ethclient.Client{}
 	mutex := sync.Mutex{}
 
 	errCh := make(chan error, opts.ConcurrentClientsNumber)
@@ -89,8 +91,18 @@ func NewEthClient(ctx context.Context, opts options.Node) (*EthClient, error) {
 				return
 			}
 
+			networkId, err := client.NetworkID(ctx)
+			if err != nil {
+				errCh <- err
+				return
+			}
+
 			mutex.Lock()
-			clients = append(clients, client)
+			if _, ok := clients[networkId.Uint64()]; !ok {
+				clients[networkId.Uint64()] = []*ethclient.Client{}
+			}
+
+			clients[networkId.Uint64()] = append(clients[networkId.Uint64()], client)
 			mutex.Unlock()
 		}()
 	}

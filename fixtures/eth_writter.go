@@ -38,7 +38,7 @@ func (e *EthWriter) Generate() error {
 
 	for blockNumber := e.opts.StartBlockNumber; blockNumber <= e.opts.EndBlockNumber; blockNumber++ {
 		// Retrieve the block by number
-		block, err := e.clients.GetClient().BlockByNumber(e.ctx, big.NewInt(int64(blockNumber)))
+		block, err := e.clients.GetClient(big.NewInt(56)).BlockByNumber(e.ctx, big.NewInt(int64(blockNumber)))
 		if err != nil {
 			zap.L().Error(
 				"failed to retrieve block",
@@ -62,7 +62,7 @@ func (e *EthWriter) Generate() error {
 
 		for _, tx := range block.Transactions() {
 			// Retrieve the transaction receipt
-			receipt, err := e.clients.GetClient().TransactionReceipt(e.ctx, tx.Hash())
+			receipt, err := e.clients.GetClient(big.NewInt(56)).TransactionReceipt(e.ctx, tx.Hash())
 			if err != nil {
 				zap.L().Error(
 					"failed to retrieve transaction receipt",

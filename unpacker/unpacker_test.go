@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/txpull/unpack/clients"
@@ -16,8 +17,11 @@ import (
 )
 
 func TestGenericUnpacker(t *testing.T) {
-	t.Skip("Requires series of credentials in order to run properly.")
+	//t.Skip("Requires series of credentials in order to run properly.")
 	tAssert := assert.New(t)
+
+	_, err := options.NewFromEnv("../.unpack.toml")
+	tAssert.NoError(err, "failure to initialize options")
 
 	ctx := context.TODO()
 
@@ -65,11 +69,14 @@ func TestGenericUnpacker(t *testing.T) {
 		os.Getenv("BITQUERY_API_KEY"),
 	)
 
+	bscscan := scanners.NewBscScanProvider(ctx, options.G().Clients.Bscscan)
+
 	unpacker, err := NewUnpacker(
 		ctx,
 		WithReaderManager(manager),
 		WithEthClient(client),
 		WithBitQuery(bitquery),
+		WithBscScan(bscscan),
 	)
 	tAssert.NoError(err, "failure to initialize unpacker")
 	tAssert.NotNil(unpacker, "unpacker is nil")
@@ -77,11 +84,17 @@ func TestGenericUnpacker(t *testing.T) {
 	// TESTS START HERE UNTIL NOW WE WERE JUST SETTING UP THE ENVIRONMENT
 
 	// First test will look for contract that we are sure it exists in both redis and clickhouse.
-	contract, err := unpacker.UnpackContract(big.NewInt(56), common.HexToAddress("0x33fDd11397Bf41CceA71572db4C2AE2F276f84EE"), nil)
+	contract, complete, err := unpacker.UnpackContract(big.NewInt(56), common.HexToAddress("0x33fDd11397Bf41CceA71572db4C2AE2F276f84EE"), nil)
 	tAssert.NoError(err, "failure to unpack contract")
 	tAssert.NotNil(contract, "contract is nil")
+	tAssert.True(complete, "contract is not complete")
 
 	// Second test will look for contract that we are sure it does not exist anywhere but we know we can find information for it
 	// on the blockchain.
+	contractNew, completeNew, err := unpacker.UnpackContract(big.NewInt(56), common.HexToAddress("0xDFf99132777B82DFf71059FeF413689d340e1e4A"), nil)
+	tAssert.NoError(err, "failure to unpack contract")
+	tAssert.NotNil(contractNew, "contract is nil")
+	tAssert.True(completeNew, "contract is not complete")
 
+	spew.Dump(contractNew)
 }

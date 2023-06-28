@@ -1,12 +1,15 @@
 package scanners
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/txpull/unpack/options"
 )
 
 // Default BscScan API URL
@@ -42,14 +45,14 @@ type BscScanErrorResponse struct {
 
 // BscScanProvider represents the BscScan scanner provider.
 type BscScanProvider struct {
-	url    string
-	apiKey string
+	ctx  context.Context
+	opts options.BscscanClient
 }
 
 // ScanContract scans the contract using the BscScan provider.
 func (p *BscScanProvider) ScanContract(contractAddress string) (*BscScanContract, error) {
 	// Construct the BscScan API URL
-	url := fmt.Sprintf("%s?module=contract&action=getsourcecode&address=%s&apikey=%s", p.url, contractAddress, p.apiKey)
+	url := fmt.Sprintf("%s?module=contract&action=getsourcecode&address=%s&apikey=%s", p.opts.URL, contractAddress, p.opts.Key)
 
 	// Send HTTP GET request to the API URL
 	resp, err := http.Get(url)
@@ -95,9 +98,9 @@ func (p *BscScanProvider) ScanContract(contractAddress string) (*BscScanContract
 }
 
 // NewBscScanProvider creates a new instance of BscScanProvider with the provided API key and API URL.
-func NewBscScanProvider(url, apiKey string) *BscScanProvider {
+func NewBscScanProvider(ctx context.Context, opts options.BscscanClient) *BscScanProvider {
 	return &BscScanProvider{
-		apiKey: apiKey,
-		url:    url,
+		ctx:  ctx,
+		opts: opts,
 	}
 }

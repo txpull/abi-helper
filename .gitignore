@@ -19,12 +19,11 @@
 
 # Go workspace file
 go.work
-
+unpack.work.code-workspace
 
 # Workspace related files
 .unpack.toml
 build/*
-*.go.prototype
 .test.env
 data/bscscan/verified-contracts.gob
 data/db

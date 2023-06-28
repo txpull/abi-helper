@@ -32,6 +32,7 @@ import (
 	"github.com/txpull/unpack/crawlers/fourbyte"
 	"github.com/txpull/unpack/db"
 	"github.com/txpull/unpack/db/models"
+	"github.com/txpull/unpack/options"
 	"github.com/txpull/unpack/scanners"
 	"go.uber.org/zap"
 )
@@ -40,11 +41,7 @@ var fourbyteCmd = &cobra.Command{
 	Use:   "fourbyte",
 	Short: "Download, process and store signatures from 4byte.directory",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		rdb, err := clients.NewRedis(
-			clients.RedisWithAddr(viper.GetString("database.redis.addr")),
-			clients.RedisWithPassword(viper.GetString("database.redis.password")),
-			clients.RedisWithDB(viper.GetInt("database.redis.db")),
-		)
+		rdb, err := clients.NewRedis(cmd.Context(), options.G().Database.Redis)
 		if err != nil {
 			return fmt.Errorf("failure to initialize redis client: %s", err)
 		}

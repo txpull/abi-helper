@@ -32,6 +32,7 @@ import (
 	bscscan_crawler "github.com/txpull/unpack/crawlers/bscscan"
 	"github.com/txpull/unpack/db"
 	"github.com/txpull/unpack/db/models"
+	"github.com/txpull/unpack/options"
 	"github.com/txpull/unpack/scanners"
 	"go.uber.org/zap"
 )
@@ -58,11 +59,7 @@ var bscscanCmd = &cobra.Command{
 			zap.String("bscscan-csv-path", bscscanVerifiedCsvPath),
 		)
 
-		rdb, err := clients.NewRedis(
-			clients.RedisWithAddr(viper.GetString("database.redis.addr")),
-			clients.RedisWithPassword(viper.GetString("database.redis.password")),
-			clients.RedisWithDB(viper.GetInt("database.redis.db")),
-		)
+		rdb, err := clients.NewRedis(cmd.Context(), options.G().Database.Redis)
 		if err != nil {
 			return fmt.Errorf("failure to initialize redis client: %s", err)
 		}
@@ -75,7 +72,7 @@ var bscscanCmd = &cobra.Command{
 			viper.GetUint16("nodes.eth.archive.concurrent_clients_number"),
 		)
 		if err != nil {
-			return err
+			return fmt.Errorf("failure to initialize eth client: %s", err)
 		}
 
 		chainId, err := client.GetNetworkID(cmd.Context())

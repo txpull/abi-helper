@@ -27,7 +27,7 @@ import (
 
 // fixturesCmd represents the fixtures command
 var syncerCmd = &cobra.Command{
-	Use:   "syncer",
+	Use:   "syncers",
 	Short: "Commands related to syncing data from third party sources",
 }
 

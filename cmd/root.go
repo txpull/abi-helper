@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/viper"
 	fixtures_cmd "github.com/txpull/unpack/cmd/fixtures"
 	syncers_cmd "github.com/txpull/unpack/cmd/syncers"
-	"github.com/txpull/unpack/helpers"
+	"github.com/txpull/unpack/options"
 	"go.uber.org/zap"
 )
 
@@ -53,7 +53,7 @@ func SetVersion(v string) {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if err := helpers.InitConfig(cfgFile); err != nil {
+	if _, err := options.New(cfgFile); err != nil {
 		zap.L().Error("failed to initialize configuration", zap.Error(err))
 		os.Exit(1)
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/txpull/unpack/clients"
 	"github.com/txpull/unpack/db"
+	"github.com/txpull/unpack/options"
 	"github.com/txpull/unpack/readers"
 	"github.com/txpull/unpack/scanners"
 )
@@ -22,8 +23,11 @@ func TestGenericUnpacker(t *testing.T) {
 
 	// Redis is used to store cached unpacked contracts.
 	rdb, err := clients.NewRedis(
-		clients.RedisWithAddr(os.Getenv("REDIS_ADDR")),
-		clients.RedisWithPassword(os.Getenv("REDIS_PASSWORD")),
+		ctx,
+		options.Redis{
+			Addr:     os.Getenv("REDIS_ADDR"),
+			Password: os.Getenv("REDIS_PASSWORD"),
+		},
 	)
 	tAssert.NoError(err, "failure to initialize redis client")
 	tAssert.NotNil(rdb, "redis client is nil")

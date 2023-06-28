@@ -22,7 +22,7 @@ go.work
 
 
 # Workspace related files
-.unpack.yaml
+.unpack.toml
 build/*
 *.go.prototype
 .test.env

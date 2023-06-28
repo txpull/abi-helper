@@ -1,0 +1,133 @@
+# This is the root section for configuring various nodes in the network.
+[networks]
+
+# This section is dedicated to the configuration of a full Ethereum node.
+[networks.ethereum.full]
+# This is the URL for the full Ethereum node. It should be filled with the appropriate address.
+url = ""
+# This parameter specifies the maximum number of concurrent clients that can establish a connection to the full Ethereum node.
+concurrent_clients_number = 3
+
+# This section is dedicated to the configuration of an Ethereum archive node.
+[networks.ethereum.archive]
+# This is the URL for the Ethereum archive node. It should be filled with the appropriate address.
+url = ""
+# This parameter specifies the maximum number of concurrent clients that can establish a connection to the Ethereum archive node.
+concurrent_clients_number = 3
+
+# This section is dedicated to the configuration of a full Binance Smart Chain node.
+[networks.binance.full]
+# This is the URL for the full Binance Smart Chain node. 
+url = ""
+# This parameter specifies the maximum number of concurrent clients that can establish a connection to the full Binance Smart Chain node.
+concurrent_clients_number = 3
+
+# This section is dedicated to the configuration of a Binance Smart Chain archive node.
+[networks.binance.archive]
+# This is the URL for the Binance Smart Chain archive node.
+url = ""
+# This parameter specifies the maximum number of concurrent clients that can establish a connection to the Binance Smart Chain archive node.
+concurrent_clients_number = 3
+
+# This is the root section for configuring fixtures.
+[fixtures]
+
+# This section is dedicated to the configuration of a block number generator.
+[fixtures.generator]
+
+# This section is dedicated to the configuration of an Ethereum block number generator.
+[fixtures.generator.ethereum]
+# This is the starting block number for the Ethereum block number generator.
+start_block_number = 0
+# This is the ending block number for the Ethereum block number generator.
+end_block_number = 0
+
+# This section is dedicated to the configuration of a Binance block number generator.
+[fixtures.generator.binance]
+# This is the starting block number for the Binance block number generator.
+start_block_number = 28978000
+# This is the ending block number for the Binance block number generator.
+end_block_number = 28978170
+
+# This is the root section for configuring clients.
+[clients]
+
+# This section is dedicated to the configuration of the Bscscan API.
+[clients.bscscan.api]
+# This is the URL for the Bscscan API.
+url = "https://api.bscscan.com/api"
+# This is the API key for the Bscscan API.
+key = ""
+
+# This section is dedicated to the configuration of the Bitquery API.
+[clients.bitquery.api]
+# This is the URL for the Bitquery API.
+url = "https://graphql.bitquery.io/"
+# This is the API key for the Bitquery API.
+key = ""
+
+
+# This is the root section for configuring the database.
+[database]
+
+# This section is dedicated to the configuration of the Redis database.
+[database.redis]
+# This is the address for the Redis database.
+addr = ":6379"
+# This is the password for the Redis database. It should be filled with the appropriate password.
+password = ""
+# This is the database number for the Redis database. It is used to select a database during connection.
+db = 0
+# This is the maximum number of retries for the Redis database.
+max_retries = 3
+# This is the minimum backoff (in milliseconds) for the Redis database.
+min_backoff_ms = 8
+# This is the maximum backoff (in milliseconds) for the Redis database.
+max_backoff_ms = 512
+
+# This section is dedicated to the configuration of the Clickhouse database.
+[database.clickhouse]
+# This is the host for the Clickhouse database. 
+host = ":9440"
+# This is the name of the database in the Clickhouse server.
+database = ""
+# This is the username for the Clickhouse database. It should be filled with the appropriate username.
+username = ""
+# This is the password for the Clickhouse database. It should be filled with the appropriate password.
+password = ""
+# This is the path to the certificate file for the Clickhouse database. It should be filled with the appropriate path.
+certificate_path = "/home/{user}/.unpack/clickhouse-client.pem"
+
+# This is the root section for configuring syncers.
+[syncers]
+
+# This section is dedicated to the configuration of the Fourbyte syncer.
+[syncers.fourbyte]
+# This is the URL for the Fourbyte syncer.
+url = "https://www.4byte.directory/api/v1/signatures/"
+# This boolean flag determines if the Fourbyte syncer should write to Clickhouse.
+write_to_clickhouse = true
+# This is the chain ID for the Fourbyte syncer. It should be filled with the appropriate chain ID.
+chain_id = 1
+
+# This section is dedicated to the configuration of the Bscscan syncer.
+[syncers.bscscan]
+# This is the path for verified contracts for the Bscscan syncer.
+verified_contracts_path = "/home/{user}/.unpack/bscscan"
+# This boolean flag determines if the Bscscan syncer should write to Clickhouse.
+write_to_clickhouse = true
+
+# This section is dedicated to the configuration of the Sourcify syncer.
+[syncers.sourcify]
+# This is the URL for the Sourcify syncer.
+url = "https://sourcify.dev/server"
+# This is the maximum number of retries for the Sourcify syncer.
+max_retries = 3
+# This is the delay (in seconds) between retries for the Sourcify syncer.
+retry_dely = 2
+# This is the rate limit (in seconds) for the Sourcify syncer.
+rate_limit_s = 20
+# This boolean flag determines if the Sourcify syncer should write to Clickhouse.
+write_to_clickhouse = true
+# This is an array of chain IDs for the Sourcify syncer. It should be filled with the appropriate chain IDs.
+chain_ids = [1, 56]

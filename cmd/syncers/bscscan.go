@@ -23,6 +23,7 @@ package syncers_cmd
 
 import (
 	"fmt"
+	"math/big"
 	"os"
 	"path"
 
@@ -65,14 +66,15 @@ var bscscanCmd = &cobra.Command{
 		}
 
 		// NewBscScanProvider creates a new instance of BscScanProvider with the provided API key and API URL.
-		scanner := scanners.NewBscScanProvider(viper.GetString("bscscan.api.url"), viper.GetString("bscscan.api.key"))
+		scanner := scanners.NewBscScanProvider(cmd.Context(), options.G().Clients.Bscscan)
 
 		client, err := clients.NewEthClient(cmd.Context(), options.G().Networks.Binance.ArchiveNode)
 		if err != nil {
 			return fmt.Errorf("failure to initialize eth client: %s", err)
 		}
 
-		chainId, err := client.GetNetworkID(cmd.Context())
+		// Handcoded chain id for now, will figure out later how to deal with it...
+		chainId, err := client.GetNetworkID(cmd.Context(), big.NewInt(56))
 		if err != nil {
 			return fmt.Errorf("failure to get network id: %s", err)
 		}

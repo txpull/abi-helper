@@ -253,7 +253,7 @@ func (w *SourcifyWriter) ProcessContractsByType(chainID *big.Int, contracts *sou
 				bitqueryInfo.Data.SmartContractCreation.SmartContractCalls[0].Transaction.Hash,
 			)
 
-			txReceipt, err := helpers.GetReceiptByHash(w.ctx, w.ethClient, contract.TransactionHash)
+			txReceipt, err := helpers.GetReceiptByHash(w.ctx, w.chainId, w.ethClient, contract.TransactionHash)
 			if err != nil {
 				zap.L().Error(
 					ErrFailedGetTransactionReceiptByHash.Error(),

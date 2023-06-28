@@ -70,16 +70,12 @@ type Clients struct {
 
 // BscscanClient is a struct that holds the API settings for the Bscscan client.
 type BscscanClient struct {
-	API ClientInfo `mapstructure:"api"`
+	URL string `mapstructure:"url"`
+	Key string `mapstructure:"key"`
 }
 
 // BitqueryClient is a struct that holds the API settings for the Bitquery client.
 type BitqueryClient struct {
-	API ClientInfo `mapstructure:"api"`
-}
-
-// ClientInfo is a struct that holds the URL and key for a client's API.
-type ClientInfo struct {
 	URL string `mapstructure:"url"`
 	Key string `mapstructure:"key"`
 }

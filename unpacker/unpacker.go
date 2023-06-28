@@ -89,13 +89,13 @@ func NewUnpacker(ctx context.Context, opts ...UnpackerOption) (*Unpacker, error)
 	return unpacker, nil
 }
 
-func (u *Unpacker) UnpackContract(chainId *big.Int, addr common.Address, abi *abis.Decoder) (*contracts.ContractResponse, error) {
-	contract, err := u.contractDecoder.DecodeByAddress(chainId, addr, abi)
+func (u *Unpacker) UnpackContract(chainId *big.Int, addr common.Address, abi *abis.Decoder) (*contracts.ContractResponse, bool, error) {
+	contract, complete, err := u.contractDecoder.DecodeByAddress(chainId, addr, abi)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return contract, nil
+	return contract, complete, nil
 }
 
 func (u *Unpacker) UnpackTransaction(chainId *big.Int, txHash common.Hash) error {

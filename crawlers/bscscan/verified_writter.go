@@ -300,7 +300,7 @@ func (bs *BscscanWriter) tryScanContract(ctx context.Context, c CsvContract) err
 				return nil
 			}
 
-			tx, _, err := helpers.GetTransactionByHash(bs.ctx, bs.ethClient, c.Txhash)
+			tx, _, err := helpers.GetTransactionByHash(bs.ctx, bs.chainId, bs.ethClient, c.Txhash)
 			if err != nil {
 				zap.L().Error(
 					ErrFailedGetTransactionByHash.Error(),
@@ -312,7 +312,7 @@ func (bs *BscscanWriter) tryScanContract(ctx context.Context, c CsvContract) err
 				continue
 			}
 
-			txReceipt, err := helpers.GetReceiptByHash(bs.ctx, bs.ethClient, c.Txhash)
+			txReceipt, err := helpers.GetReceiptByHash(bs.ctx, bs.chainId, bs.ethClient, c.Txhash)
 			if err != nil {
 				zap.L().Error(
 					ErrFailedGetTransactionReceiptByHash.Error(),

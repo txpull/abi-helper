@@ -17,4 +17,12 @@ var (
 	// ErrMissingReceipt is an error that occurs when a transaction receipt is not provided
 	// while trying to decode a contract creation transaction.
 	ErrMissingReceipt = errors.New("you need to provide transaction receipt in order to decode contract creation tx")
+
+	// ErrFailedGetTransactionByHash is an error that occurs when a transaction
+	// cannot be retrieved from the blockchain.
+	ErrFailedGetTransactionByHash = errors.New("failed to get transaction by hash")
+
+	// ErrFailedGetTransactionReceiptByHash is an error that occurs when a transaction receipt
+	// cannot be retrieved from the blockchain.
+	ErrFailedGetTransactionReceiptByHash = errors.New("failed to get transaction receipt by hash")
 )

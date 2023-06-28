@@ -1,10 +1,13 @@
 package scanners
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/txpull/unpack/options"
 )
 
 func TestBscScanProvider_ScanContract(t *testing.T) {
@@ -31,7 +34,10 @@ func TestBscScanProvider_ScanContract(t *testing.T) {
 	defer server.Close()
 
 	// Create a BscScan provider with the mock server URL
-	bscScanProvider := NewBscScanProvider(server.URL, "")
+	bscScanProvider := NewBscScanProvider(context.TODO(), options.BscscanClient{
+		URL: server.URL,
+		Key: "test",
+	})
 
 	// Define test cases for different contract addresses
 	testCases := []struct {

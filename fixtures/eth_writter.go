@@ -8,41 +8,35 @@ import (
 
 	"github.com/txpull/unpack/clients"
 	"github.com/txpull/unpack/helpers"
+	"github.com/txpull/unpack/options"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rlp"
 	"go.uber.org/zap"
 )
 
-// EthWriterConfig holds the configuration for EthWriter.
-type EthWriterConfig struct {
-	ClientURL               string // URL of the Ethereum client.
-	ConcurrentClientsNumber uint16 // Number of concurrent Ethereum clients.
-	StartBlockNumber        uint64 // Starting block number for generating fixtures.
-	EndBlockNumber          uint64 // Ending block number for generating fixtures.
-	FixtureDataPath         string // Path to the directory where fixtures will be stored.
-}
-
-// EthWriter is responsible for generating Ethereum fixtures.
+// EthWriter is a structure that encapsulates the context, options, and clients needed to generate Ethereum fixtures.
+// It also maintains the blocks, transactions, and receipts that are generated.
 type EthWriter struct {
 	ctx          context.Context
-	config       EthWriterConfig
+	opts         options.Fixtures
 	clients      *clients.EthClient
 	blocks       [][]byte
 	transactions map[common.Hash][]byte
 	receipts     map[common.Hash][]byte
 }
 
-// Generate generates the Ethereum fixtures.
-// It retrieves blocks from the blockchain within the specified range and encodes them into RLP format.
-// Transactions and receipts associated with the blocks are also encoded and stored.
+// Generate is a method that generates Ethereum fixtures.
+// It retrieves blocks within the specified range from the Ethereum blockchain, encodes them into RLP format, and stores them.
+// It also retrieves, encodes, and stores the transactions and receipts associated with these blocks.
+// If any error occurs during this process, it is logged and returned.
 func (e *EthWriter) Generate() error {
 	// Clean up previously generated data
 	e.blocks = [][]byte{}
 	e.transactions = make(map[common.Hash][]byte)
 	e.receipts = make(map[common.Hash][]byte)
 
-	for blockNumber := e.config.StartBlockNumber; blockNumber <= e.config.EndBlockNumber; blockNumber++ {
+	for blockNumber := e.opts.StartBlockNumber; blockNumber <= e.opts.EndBlockNumber; blockNumber++ {
 		// Retrieve the block by number
 		block, err := e.clients.GetClient().BlockByNumber(e.ctx, big.NewInt(int64(blockNumber)))
 		if err != nil {
@@ -109,9 +103,11 @@ func (e *EthWriter) Generate() error {
 	return nil
 }
 
-// Write writes the generated fixtures to files.
+// Write is a method that writes the generated Ethereum fixtures to files.
+// It writes the encoded blocks, transactions, and receipts to separate files.
+// If any error occurs during this process, it is logged and returned.
 func (e *EthWriter) Write() error {
-	blocksPath := filepath.Join(e.config.FixtureDataPath, "blocks.gob")
+	blocksPath := filepath.Join(e.opts.FixturesPath, "blocks.gob")
 	if err := removeFileIfExists(blocksPath); err != nil {
 		return err
 	}
@@ -124,7 +120,7 @@ func (e *EthWriter) Write() error {
 		return err
 	}
 
-	txPath := filepath.Join(e.config.FixtureDataPath, "transactions.gob")
+	txPath := filepath.Join(e.opts.FixturesPath, "transactions.gob")
 	if err := removeFileIfExists(txPath); err != nil {
 		return err
 	}
@@ -137,7 +133,7 @@ func (e *EthWriter) Write() error {
 		return err
 	}
 
-	receiptPath := filepath.Join(e.config.FixtureDataPath, "receipts.gob")
+	receiptPath := filepath.Join(e.opts.FixturesPath, "receipts.gob")
 	if err := removeFileIfExists(receiptPath); err != nil {
 		return err
 	}
@@ -155,7 +151,7 @@ func (e *EthWriter) Write() error {
 	return nil
 }
 
-// removeFileIfExists removes the file at the given path if it exists.
+// removeFileIfExists is a helper function that removes the file at the given path if it exists.
 func removeFileIfExists(path string) error {
 	if _, err := os.Stat(path); err == nil {
 		if err := os.Remove(path); err != nil {
@@ -165,16 +161,18 @@ func removeFileIfExists(path string) error {
 	return nil
 }
 
-// NewEthWriter creates a new instance of EthWriter.
-func NewEthWriter(ctx context.Context, config EthWriterConfig) (*EthWriter, error) {
+// NewEthWriter is a function that creates a new instance of EthWriter.
+// It takes a context and options as parameters, creates a new Ethereum client, and returns an EthWriter that uses this client.
+// If any error occurs during the creation of the Ethereum client, it is returned.
+func NewEthWriter(ctx context.Context, opts options.Fixtures) (*EthWriter, error) {
 	generator := &EthWriter{
 		ctx:          ctx,
-		config:       config,
+		opts:         opts,
 		transactions: make(map[common.Hash][]byte),
 		receipts:     make(map[common.Hash][]byte),
 	}
 
-	clients, err := clients.NewEthClient(config.ClientURL, config.ConcurrentClientsNumber)
+	clients, err := clients.NewEthClient(ctx, options.G().GetNode(opts.Network, opts.NodeType))
 	if err != nil {
 		return nil, err
 	}

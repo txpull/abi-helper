@@ -67,7 +67,7 @@ var bscscanCmd = &cobra.Command{
 		// NewBscScanProvider creates a new instance of BscScanProvider with the provided API key and API URL.
 		scanner := scanners.NewBscScanProvider(viper.GetString("bscscan.api.url"), viper.GetString("bscscan.api.key"))
 
-		client, err := clients.NewEthClient(cmd.Context(), options.G().Networks.Ethereum.ArchiveNode)
+		client, err := clients.NewEthClient(cmd.Context(), options.G().Networks.Binance.ArchiveNode)
 		if err != nil {
 			return fmt.Errorf("failure to initialize eth client: %s", err)
 		}
@@ -89,14 +89,7 @@ var bscscanCmd = &cobra.Command{
 		}
 
 		if viper.GetBool("syncers.bscscan.write_to_clickhouse") {
-			cdb, err := db.NewClickHouse(
-				db.WithCtx(cmd.Context()),
-				db.WithDebug(false),
-				db.WithHost(viper.GetString("database.clickhouse.host")),
-				db.WithDatabase(viper.GetString("database.clickhouse.database")),
-				db.WithUsername(viper.GetString("database.clickhouse.username")),
-				db.WithPassword(viper.GetString("database.clickhouse.password")),
-			)
+			cdb, err := db.NewClickHouse(cmd.Context(), options.G().Database.Clickhouse)
 			if err != nil {
 				return err
 			}

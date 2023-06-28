@@ -3,141 +3,96 @@ package db
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	"github.com/txpull/unpack/options"
+	"go.uber.org/zap"
 )
 
-// ClickHouse struct represents a ClickHouse database connection.
+// ClickHouse is a structure that encapsulates a ClickHouse database connection.
+// It contains a context, options for the connection, and the connection itself.
 type ClickHouse struct {
 	ctx  context.Context
+	opts options.ClickHouse
 	conn driver.Conn
 }
 
-// ClickHouseOption represents a function that applies a specific configuration to a ClickHouse database connection.
-type ClickHouseOption func(*ClickHouse, *clickhouse.Options)
-
-// WithCtx sets the context for the ClickHouse database connection.
-func WithCtx(ctx context.Context) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		c.ctx = ctx
-	}
-}
-
-// WithHost sets the host for the ClickHouse database connection.
-func WithHost(host string) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.Addr = []string{host}
-	}
-}
-
-// WithDatabase sets the database for the ClickHouse database connection.
-func WithDatabase(database string) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.Auth.Database = database
-	}
-}
-
-// WithUsername sets the username for the ClickHouse database connection.
-func WithUsername(username string) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.Auth.Username = username
-	}
-}
-
-// WithPassword sets the password for the ClickHouse database connection.
-func WithPassword(password string) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.Auth.Password = password
-	}
-}
-
-// WithDialTimeout sets the dial timeout for the ClickHouse database connection.
-func WithDialTimeout(timeout time.Duration) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.DialTimeout = timeout
-	}
-}
-
-// WithMaxOpenConns sets the maximum number of open connections for the ClickHouse database connection.
-func WithMaxOpenConns(maxConns int) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.MaxOpenConns = maxConns
-	}
-}
-
-// WithMaxIdleConns sets the maximum number of idle connections for the ClickHouse database connection.
-func WithMaxIdleConns(maxIdleConns int) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.MaxIdleConns = maxIdleConns
-	}
-}
-
-// WithConnMaxLifetime sets the maximum lifetime of a connection for the ClickHouse database connection.
-func WithConnMaxLifetime(lifetime time.Duration) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.ConnMaxLifetime = lifetime
-	}
-}
-
-// WithDebug sets the debug mode for the ClickHouse database connection.
-func WithDebug(debug bool) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.Debug = debug
-	}
-}
-
-// WithTLS sets the TLS configuration for the ClickHouse database connection.
-func WithTLS(t *tls.Config) ClickHouseOption {
-	return func(c *ClickHouse, o *clickhouse.Options) {
-		o.TLS = t
-	}
-}
-
-// CreateDatabase creates a new database in the ClickHouse database connection.
-// It returns an error if the execution of the query fails.
-func (c *ClickHouse) CreateDatabase(database string) error {
-	query := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", database)
-	return c.conn.Exec(c.ctx, query)
-}
-
-// DB returns the ClickHouse database connection.
+// DB is a method that returns the ClickHouse database connection encapsulated in the ClickHouse structure.
 func (c *ClickHouse) DB() driver.Conn {
 	return c.conn
 }
 
-// NewClickHouse creates a new ClickHouse database connection with the specifiedoptions.
-// It returns a ClickHouse database connection and an error if the connection fails.
-func NewClickHouse(opts ...ClickHouseOption) (*ClickHouse, error) {
+// ValidateOptions checks the validity of the options used to create a ClickHouse connection.
+// It checks if the required fields (Hosts, Database, Username) are set and if the numeric fields
+// (MaxExecutionTime, DialTimeout, MaxOpenConns, MaxIdleConns, MaxConnLifetime) are greater than zero.
+// If any of the checks fail, it returns an error with a message indicating which field is invalid.
+// If all checks pass, it returns nil.
+func (c *ClickHouse) ValidateOptions() error {
+	if len(c.opts.Hosts) == 0 {
+		return errors.New("at least one host must be set")
+	}
+	if c.opts.Database == "" {
+		return errors.New("database must be set")
+	}
+	if c.opts.Username == "" {
+		return errors.New("username must be set")
+	}
+	if c.opts.MaxExecutionTime <= 0 {
+		return errors.New("max execution time must be greater than 0")
+	}
+	if c.opts.DialTimeout <= 0 {
+		return errors.New("dial timeout must be greater than 0")
+	}
+	if c.opts.MaxOpenConns <= 0 {
+		return errors.New("max open connections must be greater than 0")
+	}
+	if c.opts.MaxIdleConns < 0 {
+		return errors.New("max idle connections must be greater than or equal to 0")
+	}
+	if c.opts.MaxConnLifetime <= 0 {
+		return errors.New("max connection lifetime must be greater than 0")
+	}
+	return nil
+}
+
+// NewClickHouse is a function that creates a new ClickHouse database connection using the provided context and options.
+// It configures the connection with the options, opens the connection, and checks its validity by pinging the database.
+// If the connection is successfully opened and is valid, it returns a ClickHouse structure that encapsulates the connection.
+// If the connection fails to open or is not valid, it returns an error.
+func NewClickHouse(ctx context.Context, opts options.ClickHouse) (*ClickHouse, error) {
 	options := &clickhouse.Options{
-		Debugf: func(format string, v ...any) {
-			fmt.Printf(format, v)
-		},
+		Debug: opts.DebugEnabled,
 		Settings: clickhouse.Settings{
-			"max_execution_time": 60,
+			"max_execution_time": opts.MaxExecutionTime,
 		},
 		Compression: &clickhouse.Compression{
 			Method: clickhouse.CompressionLZ4,
 		},
-		// Set default values
-		DialTimeout:          time.Second * 30,
-		MaxOpenConns:         1,
-		MaxIdleConns:         1,
-		ConnMaxLifetime:      time.Duration(10) * time.Minute,
+		Addr: opts.Hosts,
+		Auth: clickhouse.Auth{
+			Username: opts.Username,
+			Password: opts.Password,
+			Database: opts.Database,
+		},
+		DialTimeout:          time.Second * opts.DialTimeout,
+		MaxOpenConns:         opts.MaxOpenConns,
+		MaxIdleConns:         opts.MaxIdleConns,
+		ConnMaxLifetime:      opts.MaxConnLifetime * time.Minute,
 		ConnOpenStrategy:     clickhouse.ConnOpenInOrder,
 		BlockBufferSize:      10,
 		MaxCompressionBuffer: 10240,
 		Protocol:             clickhouse.Native,
-		TLS:                  &tls.Config{InsecureSkipVerify: true},
+		// TODO: Add support for TLS
+		TLS: &tls.Config{InsecureSkipVerify: true},
 	}
 
-	// Apply any specified options
-	ch := &ClickHouse{}
+	client := &ClickHouse{ctx: ctx, opts: opts}
 
-	for _, opt := range opts {
-		opt(ch, options)
+	if err := client.ValidateOptions(); err != nil {
+		return nil, err
 	}
 
 	conn, err := clickhouse.Open(options)
@@ -145,14 +100,20 @@ func NewClickHouse(opts ...ClickHouseOption) (*ClickHouse, error) {
 		return nil, err
 	}
 
-	if err := conn.Ping(ch.ctx); err != nil {
+	if err := conn.Ping(client.ctx); err != nil {
 		if exception, ok := err.(*clickhouse.Exception); ok && err.Error() != "EOF" {
-			fmt.Printf("Exception [%d] %s \n%s\n", exception.Code, exception.Message, exception.StackTrace)
+			zap.L().Error(
+				"Clickhouse raised exception",
+				zap.Int32("code", exception.Code),
+				zap.String("message", exception.Message),
+				zap.String("stacktrace", exception.StackTrace),
+			)
+
 			return nil, err
 		}
 	}
 
-	ch.conn = conn
+	client.conn = conn
 
-	return ch, nil
+	return client, nil
 }

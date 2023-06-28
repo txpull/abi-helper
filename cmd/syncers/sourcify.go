@@ -81,14 +81,7 @@ var sourcifyCmd = &cobra.Command{
 
 		// If ClickHouse is enabled, we are going to write signatures into it
 		if viper.GetBool("syncers.sourcify.write_to_clickhouse") {
-			cdb, err := db.NewClickHouse(
-				db.WithCtx(cmd.Context()),
-				db.WithDebug(false),
-				db.WithHost(viper.GetString("database.clickhouse.host")),
-				db.WithDatabase(viper.GetString("database.clickhouse.database")),
-				db.WithUsername(viper.GetString("database.clickhouse.username")),
-				db.WithPassword(viper.GetString("database.clickhouse.password")),
-			)
+			cdb, err := db.NewClickHouse(cmd.Context(), options.G().Database.Clickhouse)
 			if err != nil {
 				return err
 			}

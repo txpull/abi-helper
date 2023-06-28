@@ -68,8 +68,10 @@ func TestGenericUnpacker(t *testing.T) {
 	// You can find free rpc urls at:
 	// BSC - https://chainlist.org/chain/56
 	// ETH - https://chainlist.org/chain/1
-	// Necessary for now are: bytecode,
-	client, err := clients.NewEthClient(os.Getenv("TEST_ETH_NODE_URL"), 1)
+	client, err := clients.NewEthClient(ctx, options.Node{
+		URL:                     os.Getenv("TEST_ETH_NODE_URL"),
+		ConcurrentClientsNumber: 1,
+	})
 	tAssert.NoError(err)
 	tAssert.NotNil(client)
 

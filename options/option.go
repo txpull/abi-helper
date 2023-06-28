@@ -20,8 +20,8 @@ type Networks struct {
 
 // Nodes is a struct that holds the full and archive nodes settings.
 type Nodes struct {
-	Full    Node `mapstructure:"full"`
-	Archive Node `mapstructure:"archive"`
+	FullNode    Node `mapstructure:"full"`
+	ArchiveNode Node `mapstructure:"archive"`
 }
 
 // Node is a struct that holds the URL and the number of concurrent clients for a node.

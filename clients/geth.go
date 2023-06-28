@@ -8,23 +8,27 @@ import (
 	"sync/atomic"
 
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/txpull/unpack/options"
 )
 
 // Error messages
 var (
-	ErrClientURLNotSet         = errors.New("configuration client URL not set")
-	ErrConcurrentClientsNotSet = errors.New("configuration amount of concurrent clients is not set")
+	ErrClientURLNotSet         error = errors.New("configuration client URL not set")
+	ErrConcurrentClientsNotSet error = errors.New("configuration amount of concurrent clients is not set")
 )
 
-// EthClient is a struct that represents a load-balanced Ethereum client.
+// EthClient represents a load-balanced Ethereum client.
+// It maintains a list of underlying Ethereum clients and provides methods to interact with the Ethereum network.
 type EthClient struct {
+	ctx     context.Context
+	opts    options.Node
 	clients []*ethclient.Client
 	next    uint32
 }
 
 // Len returns the number of underlying Ethereum clients.
-func (c *EthClient) Len() uint16 {
-	return uint16(len(c.clients))
+func (c *EthClient) Len() int {
+	return len(c.clients)
 }
 
 // GetNetworkID retrieves the network ID from one of the underlying Ethereum clients.
@@ -49,32 +53,39 @@ func (c *EthClient) Close() {
 	}
 }
 
-// NewEthClient creates a new load-balanced EthClient instance with multiple Ethereum clients.
-func NewEthClient(url string, concurrentClients uint16) (*EthClient, error) {
-	if url == "" {
-		return nil, ErrClientURLNotSet
+// ValidateOptions checks the validity of the options used to create an EthClient.
+// It returns an error if any of the options are invalid.
+// Specifically, it checks if the URL for the Ethereum client is set and if the number of concurrent clients is specified.
+func (c *EthClient) ValidateOptions() error {
+	if c.opts.URL == "" {
+		return ErrClientURLNotSet
 	}
 
-	if concurrentClients == 0 {
-		return nil, ErrConcurrentClientsNotSet
+	if c.opts.ConcurrentClientsNumber == 0 {
+		return ErrConcurrentClientsNotSet
 	}
 
+	return nil
+}
+
+// NewEthClient creates a new EthClient with the given context and options.
+// It concurrently dials the specified number of Ethereum clients and returns an EthClient that load balances requests among them.
+// If any error occurs during the dialing of the Ethereum clients, it is returned.
+func NewEthClient(ctx context.Context, opts options.Node) (*EthClient, error) {
 	var wg sync.WaitGroup
-	clients := make([]*ethclient.Client, 0, concurrentClients)
+	clients := make([]*ethclient.Client, 0, opts.ConcurrentClientsNumber)
 	mutex := sync.Mutex{}
 
-	var ethClientErr error
+	errCh := make(chan error, opts.ConcurrentClientsNumber)
 
-	// In case we have a large number of load balanced clients, we load them concurrently
-	for i := uint16(0); i < concurrentClients; i++ {
+	for i := 0; i < opts.ConcurrentClientsNumber; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 
-			// Dial an Ethereum client using the provided URL
-			client, err := ethclient.Dial(url)
+			client, err := ethclient.DialContext(ctx, opts.URL)
 			if err != nil {
-				ethClientErr = err
+				errCh <- err
 				return
 			}
 
@@ -85,12 +96,17 @@ func NewEthClient(url string, concurrentClients uint16) (*EthClient, error) {
 	}
 
 	wg.Wait()
+	close(errCh)
 
-	if ethClientErr != nil {
-		return nil, ethClientErr
+	for err := range errCh {
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &EthClient{
+		ctx:     ctx,
+		opts:    opts,
 		clients: clients,
 		next:    0,
 	}, nil

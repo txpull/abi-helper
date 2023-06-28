@@ -63,10 +63,7 @@ var sourcifyCmd = &cobra.Command{
 			viper.GetString("bitquery.api.key"),
 		)
 
-		client, err := clients.NewEthClient(
-			viper.GetString("nodes.eth.archive.url"),
-			viper.GetUint16("nodes.eth.archive.concurrent_clients_number"),
-		)
+		client, err := clients.NewEthClient(cmd.Context(), options.G().Networks.Ethereum.ArchiveNode)
 		if err != nil {
 			return err
 		}

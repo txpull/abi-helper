@@ -18,10 +18,33 @@ type Networks struct {
 	Binance  Nodes `mapstructure:"binance"`
 }
 
+// GetNode returns the node settings for a given network and node.
+// Useful for the configuration and quick access to the nodes settings.
+func (o *Options) GetNode(network string, node string) Node {
+	switch network {
+	case "ethereum":
+		switch node {
+		case "full":
+			return o.Networks.Ethereum.FullNode
+		case "archive":
+			return o.Networks.Ethereum.ArchiveNode
+		}
+	case "binance":
+		switch node {
+		case "full":
+			return o.Networks.Binance.FullNode
+		case "archive":
+			return o.Networks.Binance.ArchiveNode
+		}
+	}
+
+	return Node{}
+}
+
 // Nodes is a struct that holds the full and archive nodes settings.
 type Nodes struct {
-	Full    Node `mapstructure:"full"`
-	Archive Node `mapstructure:"archive"`
+	FullNode    Node `mapstructure:"full"`
+	ArchiveNode Node `mapstructure:"archive"`
 }
 
 // Node is a struct that holds the URL and the number of concurrent clients for a node.
@@ -32,25 +55,11 @@ type Node struct {
 
 // Fixtures is a struct that holds the generator settings.
 type Fixtures struct {
-	Generator Generator `mapstructure:"generator"`
-}
-
-// Generator is a struct that holds the Ethereum and Binance generator settings.
-type Generator struct {
-	Ethereum EthereumGenerator `mapstructure:"ethereum"`
-	Binance  BinanceGenerator  `mapstructure:"binance"`
-}
-
-// EthereumGenerator is a struct that holds the start and end block numbers for the Ethereum generator.
-type EthereumGenerator struct {
-	StartBlockNumber int `mapstructure:"start_block_number"`
-	EndBlockNumber   int `mapstructure:"end_block_number"`
-}
-
-// BinanceGenerator is a struct that holds the start and end block numbers for the Binance generator.
-type BinanceGenerator struct {
-	StartBlockNumber int `mapstructure:"start_block_number"`
-	EndBlockNumber   int `mapstructure:"end_block_number"`
+	Network          string `mapstructure:"network"`
+	NodeType         string `mapstructure:"node_type"`
+	FixturesPath     string `mapstructure:"fixtures_path"`
+	StartBlockNumber uint64 `mapstructure:"start_block_number"`
+	EndBlockNumber   uint64 `mapstructure:"end_block_number"`
 }
 
 // Clients is a struct that holds the Bscscan and Bitquery client settings.
@@ -78,7 +87,7 @@ type ClientInfo struct {
 // Database is a struct that holds the Redis and Clickhouse database settings.
 type Database struct {
 	Redis      Redis      `mapstructure:"redis"`
-	Clickhouse Clickhouse `mapstructure:"clickhouse"`
+	Clickhouse ClickHouse `mapstructure:"clickhouse"`
 }
 
 // Redis is a struct that holds the settings for a Redis database.
@@ -92,12 +101,17 @@ type Redis struct {
 }
 
 // Clickhouse is a struct that holds the settings for a Clickhouse database.
-type Clickhouse struct {
-	Host            string `mapstructure:"host"`
-	Database        string `mapstructure:"database"`
-	Username        string `mapstructure:"username"`
-	Password        string `mapstructure:"password"`
-	CertificatePath string `mapstructure:"certificate_path"`
+type ClickHouse struct {
+	DebugEnabled     bool          `mapstructure:"debug_enabled"`
+	Hosts            []string      `mapstructure:"hosts"`
+	Database         string        `mapstructure:"database"`
+	Username         string        `mapstructure:"username"`
+	Password         string        `mapstructure:"password"`
+	MaxExecutionTime int           `mapstructure:"max_execution_time"`
+	DialTimeout      time.Duration `mapstructure:"dial_timeout"`
+	MaxOpenConns     int           `mapstructure:"max_open_conns"`
+	MaxIdleConns     int           `mapstructure:"max_idle_conns"`
+	MaxConnLifetime  time.Duration `mapstructure:"max_conn_lifetime_m"`
 }
 
 // Syncers is a struct that holds the settings for different syncers.

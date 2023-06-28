@@ -63,10 +63,7 @@ var sourcifyCmd = &cobra.Command{
 			viper.GetString("bitquery.api.key"),
 		)
 
-		client, err := clients.NewEthClient(
-			viper.GetString("nodes.eth.archive.url"),
-			viper.GetUint16("nodes.eth.archive.concurrent_clients_number"),
-		)
+		client, err := clients.NewEthClient(cmd.Context(), options.G().Networks.Ethereum.ArchiveNode)
 		if err != nil {
 			return err
 		}
@@ -84,14 +81,7 @@ var sourcifyCmd = &cobra.Command{
 
 		// If ClickHouse is enabled, we are going to write signatures into it
 		if viper.GetBool("syncers.sourcify.write_to_clickhouse") {
-			cdb, err := db.NewClickHouse(
-				db.WithCtx(cmd.Context()),
-				db.WithDebug(false),
-				db.WithHost(viper.GetString("database.clickhouse.host")),
-				db.WithDatabase(viper.GetString("database.clickhouse.database")),
-				db.WithUsername(viper.GetString("database.clickhouse.username")),
-				db.WithPassword(viper.GetString("database.clickhouse.password")),
-			)
+			cdb, err := db.NewClickHouse(cmd.Context(), options.G().Database.Clickhouse)
 			if err != nil {
 				return err
 			}

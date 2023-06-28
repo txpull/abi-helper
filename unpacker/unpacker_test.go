@@ -22,25 +22,12 @@ func TestGenericUnpacker(t *testing.T) {
 	ctx := context.TODO()
 
 	// Redis is used to store cached unpacked contracts.
-	rdb, err := clients.NewRedis(
-		ctx,
-		options.Redis{
-			Addr:     os.Getenv("REDIS_ADDR"),
-			Password: os.Getenv("REDIS_PASSWORD"),
-		},
-	)
+	rdb, err := clients.NewRedis(ctx, options.G().Database.Redis)
 	tAssert.NoError(err, "failure to initialize redis client")
 	tAssert.NotNil(rdb, "redis client is nil")
 
 	// ClickHouse database is used to store unpacked contracts.
-	cdb, err := db.NewClickHouse(
-		db.WithCtx(ctx),
-		db.WithDebug(false),
-		db.WithHost(os.Getenv("CLICKHOUSE_HOST")),
-		db.WithDatabase(os.Getenv("CLICKHOUSE_DATABASE")),
-		db.WithUsername(os.Getenv("CLICKHOUSE_USERNAME")),
-		db.WithPassword(os.Getenv("CLICKHOUSE_PASSWORD")),
-	)
+	cdb, err := db.NewClickHouse(ctx, options.G().Database.Clickhouse)
 	tAssert.NoError(err, "failure to initialize clickhouse client")
 	tAssert.NotNil(cdb, "clickhouse client is nil")
 
@@ -68,8 +55,7 @@ func TestGenericUnpacker(t *testing.T) {
 	// You can find free rpc urls at:
 	// BSC - https://chainlist.org/chain/56
 	// ETH - https://chainlist.org/chain/1
-	// Necessary for now are: bytecode,
-	client, err := clients.NewEthClient(os.Getenv("TEST_ETH_NODE_URL"), 1)
+	client, err := clients.NewEthClient(ctx, options.G().Networks.Binance.ArchiveNode)
 	tAssert.NoError(err)
 	tAssert.NotNil(client)
 

@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 
 	"github.com/txpull/unpack/fixtures"
+	"github.com/txpull/unpack/options"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -53,15 +54,7 @@ var generateEthCmd = &cobra.Command{
 			zap.String("fixtures-output-path", fixturesPath),
 		)
 
-		config := fixtures.EthWriterConfig{
-			ClientURL:               viper.GetString("eth.node.url"),
-			ConcurrentClientsNumber: viper.GetUint16("eth.node.concurrent_clients_number"),
-			StartBlockNumber:        viper.GetUint64("eth.generator.start_block_number"),
-			EndBlockNumber:          viper.GetUint64("eth.generator.end_block_number"),
-			FixtureDataPath:         fixturesPath,
-		}
-
-		writer, err := fixtures.NewEthWriter(cmd.Context(), config)
+		writer, err := fixtures.NewEthWriter(cmd.Context(), options.G().Fixtures)
 		if err != nil {
 			return err
 		}
